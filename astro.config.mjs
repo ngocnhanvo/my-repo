@@ -9,6 +9,7 @@ import sourceAttrsPlugin from "@wix/babel-plugin-jsx-source-attrs";
 import dynamicDataPlugin from "@wix/babel-plugin-jsx-dynamic-data";
 import customErrorOverlayPlugin from "./vite-error-overlay-plugin.js";
 import postcssPseudoToData from "@wix/postcss-pseudo-to-data";
+import cloudflare from "@astrojs/cloudflare";
 
 const isBuild = process.env.NODE_ENV == "production";
 
@@ -66,7 +67,9 @@ export default defineConfig({
       },
     } : undefined,
   },
-  ...(isBuild && { adapter: cloudProviderFetchAdapter({}) }),
+  //...(isBuild && { adapter: cloudProviderFetchAdapter({}) }),
+  // 2. Chỉ sử dụng duy nhất dòng này ở cuối hoặc trong defineConfig
+  adapter: cloudflare(),
   devToolbar: {
     enabled: false,
   },
