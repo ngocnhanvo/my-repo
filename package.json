@@ -3,9 +3,9 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-    "dev": "wix dev",
-    "build": "wix build",
-    "preview": "wix preview",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
     "release": "wix release",
     "env": "wix env pull",
     "check": "npx astro check --js-only",
@@ -157,6 +157,8 @@
   "overrides": {
     "@wix/services-definitions": "^1.0.1",
     "@wix/services-manager": "^1.0.2",
-    "@wix/services-manager-react": "^1.0.3"
+    "@wix/services-manager-react": "^1.0.3",
+    "@wix/editor-elements-definitions@^1.125.0": "npm:empty-npm-package@1.0.0",
+    "@wix/locale-dataset-javascript@^2.3.0": "npm:empty-npm-package@1.0.0"
   }
 }

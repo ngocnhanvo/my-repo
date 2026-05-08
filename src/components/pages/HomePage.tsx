@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Check, X, Zap, Code, Globe, ArrowRight, Terminal, Cpu, Layers, ChevronRight } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { BaseCrudService } from '@/integrations';
-import { ProcessSteps, ComparisonTable } from '@/entities';
+import { BaseCrudService } from '@/integrationsWP';
+import { WPProcessStep, WPComparison } from '@/entities';
 
 export default function HomePage() {
   const [language, setLanguage] = useState<'vi' | 'en'>('vi');
-  const [processSteps, setProcessSteps] = useState<ProcessSteps[]>([]);
-  const [comparisonData, setComparisonData] = useState<ComparisonTable[]>([]);
+  const [processSteps, setProcessSteps] = useState<WPProcessStep[]>([]);
+  const [comparisonData, setComparisonData] = useState<WPComparison[]>([]);
   const [isLoadingSteps, setIsLoadingSteps] = useState(true);
   const [isLoadingComparison, setIsLoadingComparison] = useState(true);
 
@@ -43,11 +43,11 @@ export default function HomePage() {
   const loadData = async () => {
     try {
       const [stepsResult, comparisonResult] = await Promise.all([
-        BaseCrudService.getAll<ProcessSteps>('processsteps'),
-        BaseCrudService.getAll<ComparisonTable>('comparisontable')
+        BaseCrudService.getAll<WPProcessStep>('processsteps'),
+        BaseCrudService.getAll<WPComparison>('comparisontable')
       ]);
       
-      const sortedSteps = stepsResult.items.sort((a, b) => (a.stepOrder || 0) - (b.stepOrder || 0));
+      const sortedSteps = stepsResult.items.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
       setProcessSteps(sortedSteps);
       setComparisonData(comparisonResult.items);
     } catch (error) {
@@ -360,7 +360,7 @@ export default function HomePage() {
                 ) : processSteps.length > 0 ? (
                   processSteps.map((step, index) => (
                     <motion.div
-                      key={step._id}
+                      key={step.id}
                       initial={{ opacity: 0, x: 50 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true, margin: "-100px" }}
@@ -369,7 +369,7 @@ export default function HomePage() {
                     >
                       {/* Node Indicator */}
                       <div className="hidden md:flex absolute left-0 top-8 w-14 h-14 rounded-none bg-background border-2 border-primary/30 items-center justify-center z-10 group-hover:border-primary group-hover:shadow-[0_0_20px_rgba(0,255,204,0.3)] transition-all duration-300 rotate-45">
-                        <span className="font-mono text-primary font-bold -rotate-45">0{step.stepOrder}</span>
+                        <span className="font-mono text-primary font-bold -rotate-45">0{step.order}</span>
                       </div>
 
                       <div className="glass-panel p-8 lg:p-10 border-l-4 border-primary/50 hover:border-primary transition-colors duration-300 relative overflow-hidden">
@@ -379,30 +379,30 @@ export default function HomePage() {
                         <div className="flex flex-col xl:flex-row gap-8 relative z-10">
                           <div className="flex-1 space-y-4">
                             <div className="md:hidden text-primary font-mono text-sm mb-2">
-                              // Phase 0{step.stepOrder}
+                              // Phase 0{step.order}
                             </div>
                             <h3 className="font-heading text-3xl font-bold text-foreground">
-                              {step.stepTitle}
+                              {step.title}
                             </h3>
                             <p className="text-foreground/70 leading-relaxed text-lg">
-                              {step.stepDescription}
+                              {step.description}
                             </p>
                             
-                            {step.stepBenefit && (
+                            {step.benefit && (
                               <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-secondary/10 border border-secondary/20 text-secondary text-sm font-mono">
                                 <Check className="w-4 h-4" />
-                                {step.stepBenefit}
+                                {step.benefit}
                               </div>
                             )}
                           </div>
 
-                          {step.stepImage && (
+                          {step.image && (
                             <div className="xl:w-1/3 shrink-0">
                               <div className="relative aspect-video xl:aspect-square overflow-hidden border border-white/10 group-hover:border-primary/30 transition-colors">
                                 <div className="absolute inset-0 bg-primary/20 mix-blend-overlay z-10 group-hover:opacity-0 transition-opacity duration-500" />
                                 <Image
-                                  src={step.stepImage}
-                                  alt={step.stepTitle || ''}
+                                  src={step.image}
+                                  alt={step.title || ''}
                                   width={600}
                                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 scale-105 group-hover:scale-100"
                                 />
@@ -472,7 +472,7 @@ export default function HomePage() {
                   <div className="space-y-3">
                     {comparisonData.map((item, index) => (
                       <motion.div
-                        key={item._id}
+                        key={item.id}
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
