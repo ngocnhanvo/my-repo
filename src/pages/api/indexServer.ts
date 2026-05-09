@@ -113,7 +113,7 @@ const getWooEndpoint = (path: string, searchParams?: URLSearchParams) => {
 
   const signature = createOAuthSignature('GET', url.origin + url.pathname, oauthParams);
   oauthParams.set('oauth_signature', signature);
-
+  console.log(`${url.origin}${url.pathname}?${oauthParams.toString()}`);
   return `${url.origin}${url.pathname}?${oauthParams.toString()}`;
 };
 
@@ -181,7 +181,7 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     const items = Array.isArray(data) ? data.map(mapWpProcessStepToEntity) : [];
-    
+
     return new Response(JSON.stringify({ items }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
