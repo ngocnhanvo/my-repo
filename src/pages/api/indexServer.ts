@@ -1,9 +1,8 @@
 import type { APIRoute } from 'astro';
 import type { WPProcessStep } from '../../entities/wordpress';
 import crypto from 'node:crypto';
-
 // XÓA BỎ TOÀN BỘ PHẦN loadEnv() VÀ CÁC THƯ VIỆN node:fs, node:path
-
+export const prerender = false;
 // Cloudflare sẽ tự nạp các biến này từ Dashboard vào process.env cho ông
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 const WC_KEY = import.meta.env.WC_KEY || process.env.WC_KEY;
@@ -93,7 +92,7 @@ export const GET: APIRoute = async ({ request }) => {
     const id = url.searchParams.get('id');
 
     if (!type) {
-      return new Response(JSON.stringify({ error: 'Thiếu tham số "type"' }), {
+      return new Response(JSON.stringify({ error: 'Thiếu tham số "type123"' + url.href.toString() }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });

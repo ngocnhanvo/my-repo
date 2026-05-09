@@ -9,10 +9,11 @@ import Footer from '@/components/Footer';
 import { BaseCrudService } from '@/integrationsWP';
 import { WPProcessStep, WPComparison } from '@/entities';
 
-// Đảm bảo rằng PUBLIC_WC_URL được định nghĩa trong tệp .env của bạn (ví dụ: PUBLIC_WC_URL=https://your-wordpress-site.com)
-const WORDPRESS_BASE_URL = import.meta.env.PUBLIC_WC_URL; 
-
-export default function HomePage() {
+// 1. Định nghĩa kiểu dữ liệu cho Props
+interface HomePageProps {
+  initialData: any; // Sau này ông có thể thay 'any' bằng kiểu dữ liệu chuẩn của mình
+}
+export default function HomePage({ initialData }: HomePageProps) {
   const [language, setLanguage] = useState<'vi' | 'en'>('vi');
   const [processSteps, setProcessSteps] = useState<WPProcessStep[]>([]);
   const [comparisonData, setComparisonData] = useState<WPComparison[]>([]);

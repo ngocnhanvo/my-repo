@@ -25,7 +25,7 @@ export const BaseCrudService = {
 
     if (!response.ok) {
       const errorBody = await response.text();
-      throw new Error(`Failed to load WooCommerce products: ${errorBody}`);
+      throw new Error(`Failed to load WPProcessSteps: ${errorBody}`);
     }
     const json = (await response.json()) as WPProcessStepResponse;
     return json.items as T;

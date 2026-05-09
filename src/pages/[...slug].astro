@@ -1,16 +1,50 @@
 ---
+// src/pages/[...slug].astro
 import { SEO } from '@wix/seo/components';
 import { loadSEOTagsServiceConfig } from '@wix/seo/services';
 import { Head } from "@/components/Head";
-import AppRouter from "@/components/Router";
 import "@wix/wix-vibe-plugins/plugins-vars.css";
 import "@wix/wix-vibe-plugins/plugins-theme.css";
 import "@/styles/global.css";
+import HomePage from '../components/pages/HomePage';
 
+let WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
+let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
+const response_process_steps = await fetch(`${WC_URL}/wp-json/wp/v2/process_steps?_embed=true`);
+const data_process_steps = await response_process_steps.json();
+
+// 1. Hàm này cực kỳ quan trọng để Astro "đúc" file tĩnh (SSG)
+export async function getStaticPaths() {
+  const routes = [
+    { slug: undefined, type: 'home', title: 'Home', description: 'Welcome to our homepage' }
+  ];
+
+  const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
+
+  // Ông vẫn có thể fetch dữ liệu từ WP cho từng trang nếu cần
+  return routes.map((route) => ({
+    params: { slug: route.slug },
+    props: { 
+      type: route.type,
+      title: route.title,
+      description: route.description,
+      baseUrl: WC_URL // Truyền URL để các component con sử dụng nếu cần
+    },
+  }));
+}
+
+// 2. Lấy dữ liệu từ props và params đã định nghĩa ở trên
+const { title, description, type } = Astro.props;
+const { slug } = Astro.params;
+
+
+const currentPageUrl = slug ? `${WC_URL_CLIENT}/${slug}` : WC_URL_CLIENT;
+
+// 3. Cấu hình SEO động theo từng bài viết
 const seoTagsServiceConfig = await loadSEOTagsServiceConfig({
-  pageUrl: Astro.url.href,
+  pageUrl: currentPageUrl,
   itemData: {
-    pageName: 'Home',
+    pageName: title || 'Home',
   },
 });
 ---
@@ -18,11 +52,12 @@ const seoTagsServiceConfig = await loadSEOTagsServiceConfig({
 <html lang="en" class="w-full h-full">
   <head>
     <Head />
+    {/* SEO sẽ được ghi thẳng vào file HTML lúc build */}
     <SEO.Tags seoTagsServiceConfig={seoTagsServiceConfig} slot="seo-tags" />
   </head>
   <body class="w-full h-full">
     <div id="root" class="w-full h-full">
-      <AppRouter client:only="react" />
+      {type === 'home' && <HomePage client:load initialData={data_process_steps} />}
     </div>
   </body>
 </html>
