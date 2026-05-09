@@ -5,15 +5,17 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "npm run build && wrangler dev",
     "release": "wix release",
     "env": "wix env pull",
     "check": "npx astro check --js-only",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "deploy": "npm run build && wrangler deploy",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
     "@astrojs/check": "0.9.4",
-    "@astrojs/cloudflare": "^12.5.5",
+    "@astrojs/cloudflare": "12",
     "@astrojs/react": "4.3.0",
     "@astrojs/tailwind": "6.0.2",
     "@hello-pangea/dnd": "18.0.1",
@@ -149,7 +151,8 @@
     "typescript": "^5.8.3",
     "vite": "^6.4.1",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "3.1.4"
+    "vitest": "3.1.4",
+    "wrangler": "^4.90.0"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.45.1"
