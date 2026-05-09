@@ -2,11 +2,18 @@
 export interface WPProduct {
   id: number;
   name: string;
-  slug: string;
-  price: string;
-  description: string;
-  images: Array<{ src: string; alt: string }>;
+  slug?: string;
+  price?: string;
+  description?: string;
+  image?: string;
+  images?: Array<{ src: string; alt: string }>;
   // ... các trường khác từ WooCommerce API
+  category?: string;
+  categoryId?: string;
+  categoryImage: string;
+  attributes?: { name: string; value: string }[];
+  material?: string;
+  dimensions?: string;
 }
 
 /** Giao diện bài viết chuẩn từ WordPress */

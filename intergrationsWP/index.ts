@@ -1,16 +1,15 @@
 import type { WPPost, WPProcessStep, WPComparison } from '../src/entities/wordpress';
 
-const API_BASE = '/api/wordpress';
+const API_BASE = '/api/indexServer';
 
+interface WPProcessStepResponse {
+  items: WPProcessStep[];
+}
 /**
  * Map giữa Collection ID (Wix style) và tham số 'type' của WordPress API Proxy.
  * Giúp bạn giữ nguyên mã nguồn ở UI khi gọi BaseCrudService.getAll('processsteps').
  */
-const collectionMap: Record<string, string> = {
-  'processsteps': 'process_steps',
-  'comparisontable': 'comparison',
-  'posts': 'posts'
-};
+
 
 /**
  * BaseCrudService dành riêng cho WordPress/WooCommerce.
@@ -21,36 +20,19 @@ export const BaseCrudService = {
    * Lấy danh sách items từ WordPress.
    * @returns Object chứa mảng items để tương thích với pattern của Wix.
    */
-  async getAll<T>(collectionName: string): Promise<{ items: T[] }> {
-    const type = collectionMap[collectionName] || collectionName;
-    const response = await fetch(`${API_BASE}?type=${type}`);
+  async get_WPProcessSteps<T extends WPProcessStep[]>(queryParams: string = ''): Promise<T> {
+    const response = await fetch(`${API_BASE}?type=process_steps&${queryParams}`);
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`[WP BaseCrudService] Failed to fetch ${type}: ${errorText}`);
+      const errorBody = await response.text();
+      throw new Error(`Failed to load WooCommerce products: ${errorBody}`);
     }
-
-    const data = await response.json();
-    
-    return {
-      items: Array.isArray(data.items) ? data.items : []
-    };
+    const json = (await response.json()) as WPProcessStepResponse;
+    return json.items as T;
   },
+  async get_WPComparison<T extends WPComparison[]>(queryParams: string = ''): Promise<T> {
 
-  /**
-   * Lấy một mục cụ thể theo ID hoặc Slug.
-   */
-  async getById<T>(collectionName: string, id: string | number): Promise<T | null> {
-    const type = collectionMap[collectionName] || collectionName;
-    const response = await fetch(`${API_BASE}?type=${type}&id=${id}`);
-
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      const errorText = await response.text();
-      throw new Error(`[WP BaseCrudService] Failed to fetch ${type} (ID: ${id}): ${errorText}`);
-    }
-
-    return await response.json();
+    return [] as T;
   }
 };
 

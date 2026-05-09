@@ -9,6 +9,9 @@ import Footer from '@/components/Footer';
 import { BaseCrudService } from '@/integrationsWP';
 import { WPProcessStep, WPComparison } from '@/entities';
 
+// Đảm bảo rằng PUBLIC_WC_URL được định nghĩa trong tệp .env của bạn (ví dụ: PUBLIC_WC_URL=https://your-wordpress-site.com)
+const WORDPRESS_BASE_URL = import.meta.env.PUBLIC_WC_URL; 
+
 export default function HomePage() {
   const [language, setLanguage] = useState<'vi' | 'en'>('vi');
   const [processSteps, setProcessSteps] = useState<WPProcessStep[]>([]);
@@ -43,13 +46,32 @@ export default function HomePage() {
   const loadData = async () => {
     try {
       const [stepsResult, comparisonResult] = await Promise.all([
-        BaseCrudService.getAll<WPProcessStep>('processsteps'),
-        BaseCrudService.getAll<WPComparison>('comparisontable')
+        // Thêm tham số _embed=true để lấy được thông tin media (featured_media)
+        BaseCrudService.get_WPProcessSteps<WPProcessStep[]>('_embed=true'),
+        BaseCrudService.get_WPComparison<WPComparison[]>()
       ]);
       
-      const sortedSteps = stepsResult.items.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
-      setProcessSteps(sortedSteps);
-      setComparisonData(comparisonResult.items);
+      // Log dữ liệu thô để kiểm tra cấu trúc từ WordPress
+      console.log('Raw WordPress Steps Items:', stepsResult);
+      
+      // Mapping dữ liệu thô từ WordPress sang Interface WPProcessStep
+      const mappedSteps: WPProcessStep[] = (stepsResult || []).map((item: any) => {
+        
+        return {
+          id: item.id,
+          title: item.title,
+          // Loại bỏ tag HTML và xử lý khoảng trắng/thực thể cơ bản
+          description: item.description?.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim() || '',
+          order: item.order || 0,
+          benefit: item.benefit || '',
+          image: item.image || ''
+        };
+      });
+
+      const finalSteps = mappedSteps.sort((a, b) => a.order - b.order);
+      console.log('Final Mapped Steps for UI:', finalSteps);
+      setProcessSteps(finalSteps);
+      setComparisonData(comparisonResult);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -381,12 +403,8 @@ export default function HomePage() {
                             <div className="md:hidden text-primary font-mono text-sm mb-2">
                               // Phase 0{step.order}
                             </div>
-                            <h3 className="font-heading text-3xl font-bold text-foreground">
-                              {step.title}
-                            </h3>
-                            <p className="text-foreground/70 leading-relaxed text-lg">
-                              {step.description}
-                            </p>
+                            <h3 className="font-heading text-3xl font-bold text-foreground" dangerouslySetInnerHTML={{ __html: step.title }} />
+                            <p className="text-foreground/70 leading-relaxed text-lg" dangerouslySetInnerHTML={{ __html: step.description }} />
                             
                             {step.benefit && (
                               <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-secondary/10 border border-secondary/20 text-secondary text-sm font-mono">
