@@ -23,6 +23,7 @@ const isBuild = process.env.NODE_ENV == "production";
 // https://astro.build/config
 export default defineConfig({
   output: "static",
+
   integrations: [
     {
       name: "framewire",
@@ -78,6 +79,7 @@ export default defineConfig({
       }
     }
   ],
+
   vite: {
     plugins: [customErrorOverlayPlugin()],
     cacheDir: 'node_modules/.cache/.vite',
@@ -109,20 +111,26 @@ export default defineConfig({
       },
     } : undefined,
   },
+
   //...(isBuild && { adapter: cloudProviderFetchAdapter({}) }),
   // 2. Chỉ sử dụng duy nhất dòng này ở cuối hoặc trong defineConfig
   //adapter: cloudflare(),
   devToolbar: {
     enabled: false,
   },
+
   image: {
     domains: [wpHost],
   },
+
   server: {
     allowedHosts: true,
     host: true,
   },
+
   security: {
     checkOrigin: false
-  }
+  },
+
+  adapter: cloudflare()
 });
