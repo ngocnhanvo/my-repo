@@ -1,63 +1,126 @@
 ---
-//src/pages/[...slug].astro
-import { SEO } from '@wix/seo/components';
-import { loadSEOTagsServiceConfig } from '@wix/seo/services';
+// src/pages/[...slug].astro
 import { Head } from "@/components/Head";
-import "@wix/wix-vibe-plugins/plugins-vars.css";
-import "@wix/wix-vibe-plugins/plugins-theme.css";
 import "@/styles/global.css";
 import HomePage from '../components/pages/HomePage';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
 
 let WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
+
+// Fetch dữ liệu từ WordPress
 const response_process_steps = await fetch(`${WC_URL}/wp-json/wp/v2/process_steps?_embed=true`);
-const data_process_steps = await response_process_steps.json();
+const raw_data = await response_process_steps.json();
+const data_process_steps = await Promise.all(raw_data.map(async (step) => {
+  const media = step._embedded?.['wp:featuredmedia']?.[0];
+  const imageUrl = media?.source_url;
+  let absoluteImageUrl = imageUrl || '';
 
-// 1. Hàm này cực kỳ quan trọng để Astro "đúc" file tĩnh (SSG)
+  if (absoluteImageUrl.startsWith('/') && WC_URL) {
+    absoluteImageUrl = `${WC_URL.replace(/\/$/, '')}${absoluteImageUrl}`;
+  }
+
+  if (absoluteImageUrl) {
+    // Download ảnh về public/images/
+    const filename = absoluteImageUrl.split('/').pop(); // buoc-1.avif
+    const localPath = `public/images/${filename}`;
+    const publicUrl = `/images/${filename}`;
+
+    if (!existsSync('public/images')) {
+      mkdirSync('public/images', { recursive: true });
+    }
+
+    const res = await fetch(absoluteImageUrl);
+    const buffer = await res.arrayBuffer();
+    writeFileSync(localPath, Buffer.from(buffer));
+
+    return { ...step, processedImage: publicUrl };
+  }
+  return step;
+}));
+
 export async function getStaticPaths() {
-  const routes = [
-    { slug: undefined, type: 'home', title: 'Home', description: 'Welcome to our homepage' }
-  ];
-
   const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
-  // Ông vẫn có thể fetch dữ liệu từ WP cho từng trang nếu cần
-  return routes.map((route) => ({
-    params: { slug: route.slug },
-    props: { 
-      type: route.type,
-      title: route.title,
-      description: route.description,
-      baseUrl: WC_URL // Truyền URL để các component con sử dụng nếu cần
+  return [
+    {
+      params: { slug: undefined },
+      props: {
+        type: 'home',
+        title: 'Vibe Code Studio – Tốc Độ AI, Chất Lượng Developer',
+        description: 'Xây dựng website chuyên nghiệp với sức mạnh AI và tay nghề chuyên gia. Hệ thống rèn đúc kỹ thuật số kết hợp AI tiên tiến với kinh nghiệm phát triển web chuyên sâu.',
+        ogImage: `${WC_URL}/wp-content/uploads/og-image.jpg`, // đổi đường dẫn ảnh OG nếu có
+        baseUrl: WC_URL,
+      },
     },
-  }));
+  ];
 }
 
-// 2. Lấy dữ liệu từ props và params đã định nghĩa ở trên
-const { title, description, type } = Astro.props;
+const { type, title, description, ogImage } = Astro.props;
 const { slug } = Astro.params;
 
-
 const currentPageUrl = slug ? `${WC_URL_CLIENT}/${slug}` : WC_URL_CLIENT;
-
-// 3. Cấu hình SEO động theo từng bài viết
-const seoTagsServiceConfig = await loadSEOTagsServiceConfig({
-  pageUrl: currentPageUrl,
-  itemData: {
-    pageName: title || 'Home',
-  },
-});
 ---
 
-<html lang="en" class="w-full h-full">
+<html lang="vi" class="w-full h-full">
   <head>
     <Head />
-    {/* SEO sẽ được ghi thẳng vào file HTML lúc build */}
-    <SEO.Tags seoTagsServiceConfig={seoTagsServiceConfig} slot="seo-tags" />
+
+    <!-- Basic SEO -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={currentPageUrl} />
+
+    <!-- Open Graph (Facebook, Zalo, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={currentPageUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="vi_VN" />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && <meta property="og:image:width" content="1200" />}
+    {ogImage && <meta property="og:image:height" content="630" />}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={currentPageUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    <!-- JSON-LD Structured Data (Google) -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Vibe Code Studio",
+      "url": WC_URL_CLIENT,
+      "description": description,
+      "inLanguage": "vi-VN",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Vibe Code Studio",
+        "url": WC_URL_CLIENT,
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "contact@vibecodestudio.com",
+          "telephone": "+84123456789",
+          "contactType": "customer service",
+          "areaServed": "VN",
+          "availableLanguage": ["Vietnamese", "English"]
+        }
+      }
+    })} />
   </head>
   <body class="w-full h-full">
     <div id="root" class="w-full h-full">
-      {type === 'home' && <HomePage client:load initialData={data_process_steps} WC_URL={WC_URL} />}
+      {type === 'home' && (
+        <HomePage
+          client:load
+          initialData={data_process_steps}
+          WC_URL={WC_URL}
+        />
+      )}
     </div>
   </body>
 </html>

@@ -1,7 +1,6 @@
 // HPI 1.7-G
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Image } from '@/components/ui/image';
 import { Button } from '@/components/ui/button';
 import { Check, X, Zap, Code, Globe, ArrowRight, Terminal, Cpu, Layers, ChevronRight } from 'lucide-react';
 import Header from '@/components/Header';
@@ -52,12 +51,6 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
 
       // Mapping dữ liệu thô từ WordPress sang Interface WPProcessStep
       const mappedSteps: WPProcessStep[] = (stepsResult || []).map((item: any) => {
-        const imageUrl = item._embedded?.['wp:featuredmedia']?.[0]?.source_url;
-        let absoluteImageUrl = imageUrl || '';
-
-        if (absoluteImageUrl.startsWith('/') && WC_URL) {
-          absoluteImageUrl = `${WC_URL.replace(/\/$/, '')}${absoluteImageUrl}`;
-        }
         return {
           id: item.id,
           title: item.title.rendered || '',
@@ -65,7 +58,7 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
           description: item.content.rendered?.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim() || '',
           order: item.acf.order || 0,
           benefit: item.acf.benefit || '',
-          image: absoluteImageUrl
+          image: item.processedImage
         };
       });
 
@@ -418,7 +411,7 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
                             <div className="xl:w-1/3 shrink-0">
                               <div className="relative aspect-video xl:aspect-square overflow-hidden border border-white/10 group-hover:border-primary/30 transition-colors">
                                 <div className="absolute inset-0 bg-primary/20 mix-blend-overlay z-10 group-hover:opacity-0 transition-opacity duration-500" />
-                                <Image
+                                <img
                                   src={step.image}
                                   alt={step.title || ''}
                                   width={600}

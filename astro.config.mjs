@@ -10,6 +10,13 @@ import dynamicDataPlugin from "@wix/babel-plugin-jsx-dynamic-data";
 import customErrorOverlayPlugin from "./vite-error-overlay-plugin.js";
 import postcssPseudoToData from "@wix/postcss-pseudo-to-data";
 import cloudflare from "@astrojs/cloudflare";
+import { loadEnv } from 'vite';
+
+// Load biến môi trường
+const { WC_URL } = loadEnv(process.env.NODE_ENV?? "development", process.cwd(), "");
+
+// Bóc tách hostname (ví dụ từ http://127.0.0.1:10010 thành 127.0.0.1)
+const wpHost = WC_URL ? new URL(WC_URL).hostname : '';
 
 const isBuild = process.env.NODE_ENV == "production";
 
@@ -55,8 +62,13 @@ export default defineConfig({
         'class-variance-authority',
         'tailwind-merge',
         '@radix-ui/*',
-        '@wix/*',
+        //'@wix/*',
         'zod',
+      ],
+      exclude: [
+        '@wix/image-kit',
+        '@wix/astro',
+        '@wix/*',
       ],
     },
     css: !isBuild ? {
@@ -74,7 +86,7 @@ export default defineConfig({
     enabled: false,
   },
   image: {
-    domains: ["static.wixstatic.com"],
+    domains: [wpHost],
   },
   server: {
     allowedHosts: true,
