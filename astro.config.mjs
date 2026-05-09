@@ -32,11 +32,11 @@ export default defineConfig({
       },
     },
     tailwind(),
-    wix({
-      htmlEmbeds: isBuild,
-      auth: true,
-    }),
-    ...(isBuild ? [monitoring()] : []),
+    // wix({
+    //   htmlEmbeds: isBuild,
+    //   auth: false,
+    // }),
+    // ...(isBuild ? [monitoring()] : []),
     react(isBuild ? {} : {
       babel: { plugins: [sourceAttrsPlugin, dynamicDataPlugin] },
     }),
@@ -69,7 +69,7 @@ export default defineConfig({
   },
   //...(isBuild && { adapter: cloudProviderFetchAdapter({}) }),
   // 2. Chỉ sử dụng duy nhất dòng này ở cuối hoặc trong defineConfig
-  adapter: cloudflare(),
+  //adapter: cloudflare(),
   devToolbar: {
     enabled: false,
   },

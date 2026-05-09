@@ -1,5 +1,5 @@
 ---
-// src/pages/[...slug].astro
+//src/pages/[...slug].astro
 import { SEO } from '@wix/seo/components';
 import { loadSEOTagsServiceConfig } from '@wix/seo/services';
 import { Head } from "@/components/Head";
@@ -57,7 +57,7 @@ const seoTagsServiceConfig = await loadSEOTagsServiceConfig({
   </head>
   <body class="w-full h-full">
     <div id="root" class="w-full h-full">
-      {type === 'home' && <HomePage client:load initialData={data_process_steps} />}
+      {type === 'home' && <HomePage client:load initialData={data_process_steps} WC_URL={WC_URL} />}
     </div>
   </body>
 </html>

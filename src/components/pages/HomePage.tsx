@@ -12,8 +12,9 @@ import { WPProcessStep, WPComparison } from '@/entities';
 // 1. Định nghĩa kiểu dữ liệu cho Props
 interface HomePageProps {
   initialData: any; // Sau này ông có thể thay 'any' bằng kiểu dữ liệu chuẩn của mình
+  WC_URL: string;
 }
-export default function HomePage({ initialData }: HomePageProps) {
+export default function HomePage({ initialData, WC_URL }: HomePageProps) {
   const [language, setLanguage] = useState<'vi' | 'en'>('vi');
   const [processSteps, setProcessSteps] = useState<WPProcessStep[]>([]);
   const [comparisonData, setComparisonData] = useState<WPComparison[]>([]);
@@ -46,31 +47,29 @@ export default function HomePage({ initialData }: HomePageProps) {
 
   const loadData = async () => {
     try {
-      const [stepsResult, comparisonResult] = await Promise.all([
-        // Thêm tham số _embed=true để lấy được thông tin media (featured_media)
-        BaseCrudService.get_WPProcessSteps<WPProcessStep[]>('_embed=true'),
-        BaseCrudService.get_WPComparison<WPComparison[]>()
-      ]);
-      
-      // Log dữ liệu thô để kiểm tra cấu trúc từ WordPress
-      console.log('Raw WordPress Steps Items:', stepsResult);
-      
+      const stepsResult = initialData as WPProcessStep[];
+      const comparisonResult = [] as WPComparison[];
+
       // Mapping dữ liệu thô từ WordPress sang Interface WPProcessStep
       const mappedSteps: WPProcessStep[] = (stepsResult || []).map((item: any) => {
-        
+        const imageUrl = item._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+        let absoluteImageUrl = imageUrl || '';
+
+        if (absoluteImageUrl.startsWith('/') && WC_URL) {
+          absoluteImageUrl = `${WC_URL.replace(/\/$/, '')}${absoluteImageUrl}`;
+        }
         return {
           id: item.id,
-          title: item.title,
+          title: item.title.rendered || '',
           // Loại bỏ tag HTML và xử lý khoảng trắng/thực thể cơ bản
-          description: item.description?.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim() || '',
-          order: item.order || 0,
-          benefit: item.benefit || '',
-          image: item.image || ''
+          description: item.content.rendered?.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim() || '',
+          order: item.acf.order || 0,
+          benefit: item.acf.benefit || '',
+          image: absoluteImageUrl
         };
       });
 
       const finalSteps = mappedSteps.sort((a, b) => a.order - b.order);
-      console.log('Final Mapped Steps for UI:', finalSteps);
       setProcessSteps(finalSteps);
       setComparisonData(comparisonResult);
     } catch (error) {
