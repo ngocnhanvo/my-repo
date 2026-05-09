@@ -14,6 +14,7 @@ const raw_data = await response_process_steps.json();
 const data_process_steps = await Promise.all(raw_data.map(async (step) => {
   const media = step._embedded?.['wp:featuredmedia']?.[0];
   const imageUrl = media?.source_url;
+  const mediaDetails = media?.media_details;
   let absoluteImageUrl = imageUrl || '';
 
   if (absoluteImageUrl.startsWith('/') && WC_URL) {
@@ -21,18 +22,24 @@ const data_process_steps = await Promise.all(raw_data.map(async (step) => {
   }
 
   if (absoluteImageUrl) {
-    // Download ảnh về public/images/
-    const filename = absoluteImageUrl.split('/').pop(); // buoc-1.avif
-    const localPath = `public/images/${filename}`;
+    const filename = absoluteImageUrl.split('/').pop();
+    const distDir = 'dist/images';
+    const localPath = `${distDir}/${filename}`;
     const publicUrl = `/images/${filename}`;
 
-    if (!existsSync('public/images')) {
-      mkdirSync('public/images', { recursive: true });
+    try {
+      if (!existsSync(distDir)) {
+        mkdirSync(distDir, { recursive: true });
+      }
+      const res = await fetch(absoluteImageUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buffer = await res.arrayBuffer();
+      writeFileSync(localPath, Buffer.from(buffer));
+      console.log(`✅ Downloaded: ${filename}`);
+    } catch (err) {
+      console.error(`❌ Failed: ${absoluteImageUrl}:`, err.message);
+      return { ...step, processedImage: absoluteImageUrl };
     }
-
-    const res = await fetch(absoluteImageUrl);
-    const buffer = await res.arrayBuffer();
-    writeFileSync(localPath, Buffer.from(buffer));
 
     return { ...step, processedImage: publicUrl };
   }

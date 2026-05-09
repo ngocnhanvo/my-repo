@@ -47,6 +47,36 @@ export default defineConfig({
     react(isBuild ? {} : {
       babel: { plugins: [sourceAttrsPlugin, dynamicDataPlugin] },
     }),
+    // Hook di chuyển ảnh từ public/images/ vào dist/images/ sau khi build xong
+    {
+      name: "move-wp-images",
+      hooks: {
+        "astro:build:done": async ({ dir }) => {
+          const { existsSync, mkdirSync, readdirSync, copyFileSync, unlinkSync, rmdirSync } = await import('fs');
+          const { fileURLToPath } = await import('url');
+
+          const srcDir = 'public/images';
+          const destDir = fileURLToPath(new URL('images/', dir));
+
+          if (!existsSync(srcDir)) {
+            console.log('⚠️ public/images/ không tồn tại, bỏ qua.');
+            return;
+          }
+
+          if (!existsSync(destDir)) mkdirSync(destDir, { recursive: true });
+
+          for (const file of readdirSync(srcDir)) {
+            copyFileSync(`${srcDir}/${file}`, `${destDir}/${file}`);
+            unlinkSync(`${srcDir}/${file}`);
+            console.log(`✅ Moved: ${file}`);
+          }
+
+          // Xóa folder public/images/ sau khi move xong
+          rmdirSync(srcDir);
+          console.log('🧹 Đã dọn sạch public/images/');
+        }
+      }
+    }
   ],
   vite: {
     plugins: [customErrorOverlayPlugin()],
