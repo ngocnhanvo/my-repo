@@ -1,66 +1,13 @@
 import type { APIRoute } from 'astro';
 import type { WPProcessStep } from '../../entities/wordpress';
 import crypto from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { existsSync } from 'node:fs';
 
-const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+// XÓA BỎ TOÀN BỘ PHẦN loadEnv() VÀ CÁC THƯ VIỆN node:fs, node:path
 
-const loadEnv = () => {
-  // Chỉ nạp nếu các biến WooCommerce cơ bản chưa được thiết lập
-  if (process.env.WC_URL && process.env.WC_KEY && process.env.WC_SECRET) {
-    return;
-  }
-
-  const possibleEnvPaths = [
-    resolve(projectRoot, '.env'), // Chỉ tìm file .env chuẩn
-    resolve(projectRoot, '.env.local'),
-    resolve(projectRoot, '.env.development'),
-  ];
-
-  let envFilePath = '';
-  for (const path of possibleEnvPaths) {
-    if (existsSync(path)) {
-      envFilePath = path;
-      break;
-    }
-  }
-
-  if (!envFilePath) {
-    console.warn('[API/ACF] No .env file found at expected paths.');
-    return;
-  }
-
-  try {
-    const envFile = readFileSync(envFilePath, 'utf-8');
-    console.log(`[API/ACF] Successfully read env from: ${envFilePath}`);
-    for (const line of envFile.split(/\r?\n/)) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#')) continue;
-      const equalsIndex = trimmed.indexOf('=');
-      if (equalsIndex === -1) continue;
-      const key = trimmed.slice(0, equalsIndex).trim();
-      const value = trimmed.slice(equalsIndex + 1).trim();
-      // Only set if the variable is not already defined in process.env
-      if (process.env[key] === undefined) {
-        process.env[key] = value.replace(/^"|"$/g, '').replace(/^'|'$/g, '');
-      }
-    }
-  } catch {
-    // Ignore missing .env file; fail later if env vars are required.
-  }
-};
-
-loadEnv();
-
-const WC_URL = process.env.WC_URL;
-const WC_KEY = process.env.WC_KEY;
-const WC_SECRET = process.env.WC_SECRET;
-// Tự động tạo COCART_URL từ WC_URL để không phụ thuộc vào file .env
-
-const DEFAULT_WOO_IMAGE = 'https://static.wixstatic.com/media/73be94_97c40b507e5c4d8a85419190f7952003~mv2.png?originWidth=448&originHeight=384';
+// Cloudflare sẽ tự nạp các biến này từ Dashboard vào process.env cho ông
+const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
+const WC_KEY = import.meta.env.WC_KEY || process.env.WC_KEY;
+const WC_SECRET = import.meta.env.WC_SECRET || process.env.WC_SECRET;
 
 const percentEncode = (value: string) =>
   encodeURIComponent(value)
@@ -81,7 +28,7 @@ const createOAuthSignature = (method: string, baseUrl: string, params: URLSearch
     .join('&');
 
   const baseString = [
-    method.toUpperCase(), // Đảm bảo method là chữ hoa cho chữ ký
+    method.toUpperCase(),
     percentEncode(baseUrl),
     percentEncode(paramString),
   ].join('&');
@@ -92,13 +39,12 @@ const createOAuthSignature = (method: string, baseUrl: string, params: URLSearch
 
 const getWooEndpoint = (path: string, searchParams?: URLSearchParams) => {
   if (!WC_URL || !WC_KEY || !WC_SECRET) {
-    throw new Error('WooCommerce env vars WC_URL, WC_KEY, and WC_SECRET are required');
+    throw new Error('Thiếu cấu hình WC_URL, WC_KEY hoặc WC_SECRET trên Dashboard Cloudflare');
   }
 
   const url = new URL(path, WC_URL);
   const params = new URLSearchParams(searchParams?.toString() ?? '');
-  params.set('per_page', '100');
-
+  
   const oauthParams = new URLSearchParams({
     oauth_consumer_key: WC_KEY,
     oauth_nonce: Math.random().toString(36).slice(2, 12),
@@ -107,13 +53,13 @@ const getWooEndpoint = (path: string, searchParams?: URLSearchParams) => {
     oauth_version: '1.0',
   });
 
-  for (const [key, value] of params.entries()) { // Thêm các tham số tìm kiếm khác vào oauthParams
+  for (const [key, value] of params.entries()) {
     oauthParams.set(key, value);
   }
 
   const signature = createOAuthSignature('GET', url.origin + url.pathname, oauthParams);
   oauthParams.set('oauth_signature', signature);
-  console.log(`${url.origin}${url.pathname}?${oauthParams.toString()}`);
+  
   return `${url.origin}${url.pathname}?${oauthParams.toString()}`;
 };
 
@@ -122,14 +68,10 @@ const stripHtml = (value: unknown): string => {
   return value.replace(/<[^>]+>/g, '').trim();
 };
 
-/**
- * Ánh xạ dữ liệu thô từ WordPress Process Step sang thực thể WPProcessStep
- */
 const mapWpProcessStepToEntity = (item: any): WPProcessStep => {
   const imageUrl = item._embedded?.['wp:featuredmedia']?.[0]?.source_url;
   let absoluteImageUrl = imageUrl || '';
 
-  // Chuyển đổi đường dẫn tương đối thành tuyệt đối nếu cần thiết dựa trên WC_URL
   if (absoluteImageUrl.startsWith('/') && WC_URL) {
     absoluteImageUrl = `${WC_URL.replace(/\/$/, '')}${absoluteImageUrl}`;
   }
@@ -148,8 +90,8 @@ export const GET: APIRoute = async ({ request }) => {
   try {
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
-    const _embed = url.searchParams.get('_embed');
     const id = url.searchParams.get('id');
+
     if (!type) {
       return new Response(JSON.stringify({ error: 'Thiếu tham số "type"' }), {
         status: 400,
@@ -158,14 +100,17 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     const searchParams = new URLSearchParams();
-    searchParams.set('_embed', _embed || 'true'); // Luôn nhúng dữ liệu media
+    searchParams.set('_embed', 'true');
     searchParams.set('per_page', '100');
 
     let endpointPath = `/wp-json/wp/v2/${type}`;
     if (id) endpointPath += `/${id}`;
+
+    // Gọi API WordPress qua Tunnel
     const response = await fetch(getWooEndpoint(endpointPath, searchParams));
+    
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: `Không thể tải dữ liệu ${type} từ WordPress` }), {
+      return new Response(JSON.stringify({ error: `WordPress trả về lỗi: ${response.status}` }), {
         status: response.status,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -181,13 +126,12 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     const items = Array.isArray(data) ? data.map(mapWpProcessStepToEntity) : [];
-
     return new Response(JSON.stringify({ items }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Lỗi máy chủ' }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Lỗi Server Cloudflare' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
