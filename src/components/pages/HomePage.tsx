@@ -2,21 +2,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Check, X, Zap, Code, Globe, ArrowRight, Terminal, Cpu, Layers, ChevronRight } from 'lucide-react';
+import { Check, AlertTriangle, Zap, Code, Globe, ArrowRight, Terminal, Cpu, Layers, ChevronRight } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { BaseCrudService } from '@/integrationsWP';
-import { WPProcessStep, WPComparison } from '@/entities';
+import { content } from '@/lib/wordpress/trangchu';
+import { WPProcessStep, WPComparison, WPInfo } from '@/entities';
 
 // 1. Định nghĩa kiểu dữ liệu cho Props
 interface HomePageProps {
-  initialData: any; // Sau này ông có thể thay 'any' bằng kiểu dữ liệu chuẩn của mình
+  data_process_steps: WPProcessStep[];
+  data_compre: WPComparison[];
+  data_info: WPInfo[];
   WC_URL: string;
 }
-export default function HomePage({ initialData, WC_URL }: HomePageProps) {
+export default function HomePage({ data_process_steps, data_compre, data_info, WC_URL }: HomePageProps) {
   const [language, setLanguage] = useState<'vi' | 'en'>('vi');
   const [processSteps, setProcessSteps] = useState<WPProcessStep[]>([]);
   const [comparisonData, setComparisonData] = useState<WPComparison[]>([]);
+  const [infoData, setDataInfo] = useState<WPInfo>({ id: 0 });
   const [isLoadingSteps, setIsLoadingSteps] = useState(true);
   const [isLoadingComparison, setIsLoadingComparison] = useState(true);
 
@@ -39,112 +42,38 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
   const heroY = useTransform(heroProgress, [0, 1], ["0%", "50%"]);
   const heroOpacity = useTransform(heroProgress, [0, 0.8], [1, 0]);
   const processLineHeight = useTransform(processProgress, [0.2, 0.8], ["0%", "100%"]);
+  let prefixWP = language === 'en' ? 'en_' : '';
+  // Khôi phục ngôn ngữ đã lưu từ localStorage khi trang vừa load
+  useEffect(() => {
+    const savedLang = localStorage.getItem('vibe_app_lang');
+    if (savedLang === 'vi' || savedLang === 'en') {
+      setLanguage(savedLang);
+    }
+  }, []);
 
+  // Lưu ngôn ngữ mới vào localStorage mỗi khi người dùng thay đổi
+  useEffect(() => {
+    localStorage.setItem('vibe_app_lang', language);
+  }, [language]);
+  
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
     try {
-      const stepsResult = initialData as WPProcessStep[];
-      const comparisonResult = [] as WPComparison[];
-
-      // Mapping dữ liệu thô từ WordPress sang Interface WPProcessStep
-      const mappedSteps: WPProcessStep[] = (stepsResult || []).map((item: any) => {
-        return {
-          id: item.id,
-          title: item.title.rendered || '',
-          // Loại bỏ tag HTML và xử lý khoảng trắng/thực thể cơ bản
-          description: item.content.rendered?.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim() || '',
-          order: item.acf.order || 0,
-          benefit: item.acf.benefit || '',
-          image: item.processedImage
-        };
-      });
-
-      const finalSteps = mappedSteps.sort((a, b) => a.order - b.order);
+      const stepsResult = data_process_steps;
+      const comparisonResult = data_compre;
+      const finalSteps = stepsResult.sort((a, b) => a.order - b.order);
+      const finalComparison = comparisonResult.sort((a, b) => a.order - b.order);
       setProcessSteps(finalSteps);
-      setComparisonData(comparisonResult);
+      setComparisonData(finalComparison);
+      setDataInfo(data_info[0]);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
       setIsLoadingSteps(false);
       setIsLoadingComparison(false);
-    }
-  };
-
-  const content = {
-    vi: {
-      hero: {
-        title1: 'Tốc Độ AI',
-        title2: 'Chất Lượng Developer',
-        subtitle: 'Xây dựng website chuyên nghiệp với sức mạnh AI và tay nghề chuyên gia',
-        description: 'Hệ thống rèn đúc kỹ thuật số kết hợp công nghệ AI tiên tiến với kinh nghiệm phát triển web chuyên sâu. Tạo ra những nền tảng vượt trội về hiệu suất và thẩm mỹ.',
-        cta: 'Khởi Động Dự Án',
-        ctaSecondary: 'Khám Phá Hệ Thống'
-      },
-      process: {
-        title: 'Quy Trình Vận Hành',
-        subtitle: 'Kiến trúc 3 giai đoạn tối ưu hóa từ ý tưởng đến triển khai thực tế.'
-      },
-      comparison: {
-        title: 'Phân Tích Hiệu Suất',
-        subtitle: 'Đánh giá năng lực cốt lõi: Vibe Code Studio vs Nền tảng tiêu chuẩn',
-        feature: 'Thông Số Kỹ Thuật',
-        vibeStudio: 'Vibe Code Studio',
-        standardWix: 'Wix Tiêu Chuẩn'
-      },
-      pricing: {
-        title: 'Gói Triển Khai',
-        subtitle: 'Cấu hình tối ưu cho mọi quy mô doanh nghiệp',
-        from: 'Khởi điểm từ',
-        currency: 'VNĐ',
-        contact: 'Yêu Cầu Báo Giá'
-      },
-      contact: {
-        title: 'Kết Nối Hệ Thống',
-        subtitle: 'Trung tâm điều hành tại TP. Hồ Chí Minh - Sẵn sàng phục vụ toàn cầu',
-        location: 'TP. Hồ Chí Minh, Việt Nam',
-        email: 'contact@vibecodestudio.com',
-        phone: '+84 123 456 789',
-        cta: 'Truyền Tín Hiệu'
-      }
-    },
-    en: {
-      hero: {
-        title1: 'AI Velocity',
-        title2: 'Developer Precision',
-        subtitle: 'Build professional websites with AI power and expert craftsmanship',
-        description: 'A digital forge combining cutting-edge AI technology with deep web development expertise. Creating platforms that excel in performance and aesthetics.',
-        cta: 'Initialize Project',
-        ctaSecondary: 'Explore System'
-      },
-      process: {
-        title: 'Operational Workflow',
-        subtitle: 'A 3-stage architecture optimized from concept to deployment.'
-      },
-      comparison: {
-        title: 'Performance Analysis',
-        subtitle: 'Core capability assessment: Vibe Code Studio vs Standard platforms',
-        feature: 'Technical Specs',
-        vibeStudio: 'Vibe Code Studio',
-        standardWix: 'Standard Wix'
-      },
-      pricing: {
-        title: 'Deployment Plans',
-        subtitle: 'Optimized configurations for all business scales',
-        from: 'Starting at',
-        currency: 'VND',
-        contact: 'Request Quote'
-      },
-      contact: {
-        title: 'System Connection',
-        subtitle: 'Command center in Ho Chi Minh City - Ready for global deployment',
-        location: 'Ho Chi Minh City, Vietnam',
-        email: 'contact@vibecodestudio.com',
-        phone: '+84 123 456 789',
-        cta: 'Transmit Signal'
-      }
     }
   };
 
@@ -212,7 +141,7 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
               className="inline-flex items-center gap-3 px-4 py-2 rounded-none border-l-2 border-primary bg-primary/5 backdrop-blur-sm"
             >
               <Terminal className="w-4 h-4 text-primary" />
-              <span className="text-xs font-mono tracking-widest text-primary uppercase">System.Init() // Vibe Code Studio</span>
+              <span className="text-xs font-mono tracking-widest text-primary uppercase">System.Init() // {infoData[`${prefixWP}tencongty`]}</span>
             </motion.div>
             
             <div className="space-y-2">
@@ -396,13 +325,13 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
                             <div className="md:hidden text-primary font-mono text-sm mb-2">
                               // Phase 0{step.order}
                             </div>
-                            <h3 className="font-heading text-3xl font-bold text-foreground" dangerouslySetInnerHTML={{ __html: step.title }} />
-                            <p className="text-foreground/70 leading-relaxed text-lg" dangerouslySetInnerHTML={{ __html: step.description }} />
-                            
-                            {step.benefit && (
+                            <h3 className="font-heading text-3xl font-bold text-foreground" dangerouslySetInnerHTML={{ __html: step[`${prefixWP}tieudechinh`] }} />
+                            <p className="text-foreground/70 leading-relaxed text-lg" dangerouslySetInnerHTML={{ __html: step[`${prefixWP}mota`] }} />
+
+                            {step[`${prefixWP}benefit`] && (
                               <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-secondary/10 border border-secondary/20 text-secondary text-sm font-mono">
                                 <Check className="w-4 h-4" />
-                                {step.benefit}
+                                {step[`${prefixWP}benefit`]}
                               </div>
                             )}
                           </div>
@@ -413,7 +342,7 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
                                 <div className="absolute inset-0 bg-primary/20 mix-blend-overlay z-10 group-hover:opacity-0 transition-opacity duration-500" />
                                 <img
                                   src={step.image}
-                                  alt={step.title || ''}
+                                  alt={step[`${prefixWP}tieudechinh`] || ''}
                                   width={600}
                                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 scale-105 group-hover:scale-100"
                                 />
@@ -488,16 +417,16 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.4, delay: index * 0.05 }}
-                        className="grid grid-cols-12 gap-4 p-6 glass-panel hover:bg-white/[0.02] transition-colors items-center group"
+                        className="grid grid-cols-12 gap-4 p-6 glass-panel hover:bg-white/[0.02] transition-colors items-start group"
                       >
                         {/* Feature Column */}
                         <div className="col-span-4 pr-4 border-r border-white/10">
                           <p className="font-bold text-foreground text-lg mb-1 group-hover:text-primary transition-colors">
-                            {item.featureName}
+                            {item[`${prefixWP}thongsokythuat`]}
                           </p>
-                          {item.featureDescription && (
+                          {item[`${prefixWP}thongsokythuat`] && (
                             <p className="text-sm text-foreground/50 font-mono">
-                              {item.featureDescription}
+                              {/* {item[`${prefixWP}thongsokythuat`]} */}
                             </p>
                           )}
                         </div>
@@ -511,11 +440,11 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
                             </div>
                             <div>
                               <p className="text-foreground font-medium mb-1">
-                                {item.vibeCodeStudioCapability}
+                                {item[`${prefixWP}chungtoi`]}
                               </p>
-                              {item.vibeCodeStudioBenefit && (
-                                <p className="text-xs text-primary/80 font-mono">
-                                  + {item.vibeCodeStudioBenefit}
+                              {item[`${prefixWP}chungtoi`] && (
+                                <p className="text-xs text-foreground/40 font-mono">
+                                  {/* {item[`${prefixWP}chungtoi`]} */}
                                 </p>
                               )}
                             </div>
@@ -523,18 +452,18 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
                         </div>
 
                         {/* Standard Wix Column */}
-                        <div className="col-span-4 pl-4 border-l border-white/10 opacity-60 group-hover:opacity-100 transition-opacity">
+                        <div className="col-span-4 pl-4 border-l border-white/10 opacity-100 group-hover:opacity-100 transition-opacity">
                           <div className="flex items-start gap-3">
                             <div className="mt-1 bg-white/10 p-1 rounded-sm">
-                              <X className="w-4 h-4 text-foreground/50" />
+                              <AlertTriangle className="w-4 h-4 text-foreground/50" />
                             </div>
                             <div>
-                              <p className="text-foreground/70 mb-1">
-                                {item.standardWixCapability}
+                              <p className="text-foreground font-medium mb-1">
+                                {item[`${prefixWP}wix_0`]}
                               </p>
-                              {item.standardWixLimitation && (
+                              {item[`${prefixWP}wix_0`] && (
                                 <p className="text-xs text-foreground/40 font-mono">
-                                  - {item.standardWixLimitation}
+                                  {/* - {item[`${prefixWP}wix_0`]} */}
                                 </p>
                               )}
                             </div>
@@ -654,9 +583,9 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
 
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
-              { icon: Globe, title: language === 'vi' ? 'Tọa Độ' : 'Coordinates', value: t.contact.location, color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/30' },
-              { icon: Code, title: 'Protocol', value: t.contact.email, color: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/30' },
-              { icon: Zap, title: language === 'vi' ? 'Tần Số' : 'Frequency', value: t.contact.phone, color: 'text-accent-blue', bg: 'bg-accent-blue/10', border: 'border-accent-blue/30' }
+              { icon: Globe, title: language === 'vi' ? 'Tọa Độ' : 'Coordinates', value: infoData[`${prefixWP}diachi`], color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/30' },
+              { icon: Code, title: language === 'vi' ? 'Email' : 'Email', value: infoData[`email`], color: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/30' },
+              { icon: Zap, title: language === 'vi' ? 'Số Điện Thoại' : 'Phone Number', value: infoData[`sodienthoai`], color: 'text-accent-blue', bg: 'bg-accent-blue/10', border: 'border-accent-blue/30' }
             ].map((item, index) => (
               <motion.div
                 key={index}
@@ -670,7 +599,7 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
                   <item.icon className={`w-6 h-6 ${item.color}`} />
                 </div>
                 <h3 className="font-mono text-sm text-foreground/50 uppercase tracking-wider mb-2">{item.title}</h3>
-                <p className="text-foreground font-medium text-lg">{item.value}</p>
+                <p className="text-foreground font-medium text-lg break-words">{item.value}</p>
               </motion.div>
             ))}
           </div>
@@ -696,7 +625,7 @@ export default function HomePage({ initialData, WC_URL }: HomePageProps) {
         </div>
       </section>
 
-      <Footer language={language} />
+      <Footer language={language} infoData={infoData} prefixWP={prefixWP} />
     </div>
   );
 }

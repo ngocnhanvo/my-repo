@@ -29,21 +29,38 @@ export interface WPPost {
 
 /** Giao diện Quy trình (Custom Post Type) từ WordPress */
 export interface WPProcessStep {
-  id: number;
-  title: string;
-  description: string;
-  order: number;
+  id?: number;
+  tieudechinh?: string;
+  en_tieudechinh?: string;
+  mota?: string;
+  en_mota?: string;
   benefit?: string;
+  en_benefit?: string;
+  order?: number;
   image?: string;
 }
 
 /** Giao diện Bảng so sánh từ WordPress */
 export interface WPComparison {
   id: number;
-  featureName: string;
-  featureDescription?: string;
-  vibeCodeStudioCapability: string;
-  standardWixCapability: string;
-  vibeCodeStudioBenefit?: string;
-  standardWixLimitation?: string;
+  thongsokythuat?: string;
+  chungtoi?: string;
+  wix_0?: string;
+  en_thongsokythuat?: string;
+  en_chungtoi?: string;
+  en_wix_0?: string;
+  order?: number;
+}
+
+/** Giao diện chung */
+export interface WPInfo {
+  id: number;
+  tencongty?: string;
+  en_tencongty?: string;
+  diachi?: string;
+  en_diachi?: string;
+  sodienthoai?: string;
+  email?: string;
+  logo?: string;
+  favicon?: string;
 }

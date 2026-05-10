@@ -1,11 +1,14 @@
+import { WPInfo } from '@/entities/wordpress';
 import { motion } from 'framer-motion';
 import { Code, Zap, Globe } from 'lucide-react';
 
 interface FooterProps {
   language: 'vi' | 'en';
+  infoData: WPInfo;
+  prefixWP?: string;
 }
 
-export default function Footer({ language }: FooterProps) {
+export default function Footer({ language, infoData, prefixWP }: FooterProps) {
   const content = {
     vi: {
       tagline: 'Tốc độ AI & Chất lượng Developer',
@@ -164,13 +167,13 @@ export default function Footer({ language }: FooterProps) {
               <li>{language === 'vi' ? 'TP. Hồ Chí Minh' : 'Ho Chi Minh City'}</li>
               <li>{language === 'vi' ? 'Việt Nam' : 'Vietnam'}</li>
               <li className="pt-2">
-                <a href="mailto:contact@vibecodestudio.com" className="hover:text-primary transition-colors">
-                  contact@vibecodestudio.com
+                <a href={`mailto:${infoData.email}`} className="hover:text-primary transition-colors break-words">
+                  {infoData.email}
                 </a>
               </li>
               <li>
-                <a href="tel:+84123456789" className="hover:text-primary transition-colors">
-                  +84 123 456 789
+                <a href={`tel:${infoData.sodienthoai}`} className="hover:text-primary transition-colors">
+                  {infoData.sodienthoai}
                 </a>
               </li>
             </ul>
