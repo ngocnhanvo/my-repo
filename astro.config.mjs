@@ -52,6 +52,8 @@ export default defineConfig({
       name: "move-wp-images",
       hooks: {
         "astro:build:done": async ({ dir }) => {
+          if (!isBuild) return; // Chỉ chạy khi build, không chạy khi dev
+          
           const { existsSync, mkdirSync, readdirSync, copyFileSync, unlinkSync, rmdirSync } = await import('fs');
           const { fileURLToPath } = await import('url');
 

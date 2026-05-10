@@ -9,7 +9,13 @@ let WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
 
 // Fetch dữ liệu từ WordPress
-const response_process_steps = await fetch(`${WC_URL}/wp-json/wp/v2/process_steps?_embed=true`);
+const response_process_steps = await fetch(
+    `${WC_URL}/wp-json/wp/v2/process_steps?_embed=true`, 
+    { 
+        cache: 'no-store' 
+    }
+);
+
 const raw_data = await response_process_steps.json();
 const data_process_steps = await Promise.all(raw_data.map(async (step) => {
   const media = step._embedded?.['wp:featuredmedia']?.[0];
