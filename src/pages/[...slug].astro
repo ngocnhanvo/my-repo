@@ -10,11 +10,12 @@ let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
 
 // Fetch dữ liệu từ WordPress
 const response_process_steps = await fetch(
-    `${WC_URL}/wp-json/wp/v2/process_steps?_embed=true`, 
+    `${WC_URL}/wp-json/wp/v2/process_steps?_embed=true&v=${Date.now()}`, 
     { 
         cache: 'no-store' 
     }
 );
+console.log('response_process_steps:', response_process_steps);
 
 const raw_data = await response_process_steps.json();
 const data_process_steps = await Promise.all(raw_data.map(async (step) => {
