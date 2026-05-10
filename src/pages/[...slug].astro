@@ -15,9 +15,8 @@ const response_process_steps = await fetch(
         cache: 'no-store' 
     }
 );
-console.log('response_process_steps:', response_process_steps);
-
 const raw_data = await response_process_steps.json();
+console.log('raw_data:', raw_data);
 const data_process_steps = await Promise.all(raw_data.map(async (step) => {
   const media = step._embedded?.['wp:featuredmedia']?.[0];
   const imageUrl = media?.source_url;
@@ -127,6 +126,7 @@ const currentPageUrl = slug ? `${WC_URL_CLIENT}/${slug}` : WC_URL_CLIENT;
     })} />
   </head>
   <body class="w-full h-full">
+    <div style="display:none">Build ID: {Date.now()}</div>
     <div id="root" class="w-full h-full">
       {type === 'home' && (
         <HomePage
