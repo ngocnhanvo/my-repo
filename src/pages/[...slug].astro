@@ -2,7 +2,7 @@
 // src/pages/[...slug].astro
 import { Head } from "@/components/Head";
 import "@/styles/global.css";
-import HomePage from '../components/pages/HomePage';
+import AppRouter from '../components/Router';
 import { getProcessSteps } from '../lib/wordpress/quytrinh';
 import { getCompre } from '../lib/wordpress/sosanh';
 import { getInfo } from '../lib/wordpress/trangchu';
@@ -90,7 +90,7 @@ const currentPageUrl = slug ? `${WC_URL_CLIENT}/${slug}` : WC_URL_CLIENT;
     <div style="display:none">Build ID: {Date.now()}</div>
     <div id="root" class="w-full h-full">
       {type === 'home' && (
-        <HomePage
+        <AppRouter
           client:load
           data_process_steps={data_process_steps}
           data_compre={data_compre}

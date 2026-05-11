@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { content } from '@/lib/wordpress/trangchu';
 import { WPProcessStep, WPComparison, WPInfo } from '@/entities';
+import { useOutletContext } from 'react-router-dom'; // Import useOutletContext
 
 // 1. Định nghĩa kiểu dữ liệu cho Props
 interface HomePageProps {
@@ -15,8 +16,14 @@ interface HomePageProps {
   data_info: WPInfo[];
   WC_URL: string;
 }
+// Define the context type
+interface OutletContextType {
+  language: 'vi' | 'en';
+  setLanguage: (lang: 'vi' | 'en') => void;
+}
 export default function HomePage({ data_process_steps, data_compre, data_info, WC_URL }: HomePageProps) {
-  const [language, setLanguage] = useState<'vi' | 'en'>('vi');
+  // Get language and setLanguage from OutletContext
+  const { language, setLanguage } = useOutletContext<OutletContextType>();
   const [processSteps, setProcessSteps] = useState<WPProcessStep[]>([]);
   const [comparisonData, setComparisonData] = useState<WPComparison[]>([]);
   const [infoData, setDataInfo] = useState<WPInfo>({ id: 0 });
@@ -43,18 +50,6 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
   const heroOpacity = useTransform(heroProgress, [0, 0.8], [1, 0]);
   const processLineHeight = useTransform(processProgress, [0.2, 0.8], ["0%", "100%"]);
   let prefixWP = language === 'en' ? 'en_' : '';
-  // Khôi phục ngôn ngữ đã lưu từ localStorage khi trang vừa load
-  useEffect(() => {
-    const savedLang = localStorage.getItem('vibe_app_lang');
-    if (savedLang === 'vi' || savedLang === 'en') {
-      setLanguage(savedLang);
-    }
-  }, []);
-
-  // Lưu ngôn ngữ mới vào localStorage mỗi khi người dùng thay đổi
-  useEffect(() => {
-    localStorage.setItem('vibe_app_lang', language);
-  }, [language]);
   
   useEffect(() => {
     loadData();
@@ -106,7 +101,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
         }
       `}</style>
 
-      <Header language={language} setLanguage={setLanguage} />
+      <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} />
 
       {/* HERO SECTION - The Digital Forge */}
       <section 

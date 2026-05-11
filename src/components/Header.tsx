@@ -2,14 +2,19 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Globe } from 'lucide-react';
+import { WPInfo } from '@/entities';
+import { useLocation } from 'react-router-dom'; // Import useLocation
 
 interface HeaderProps {
   language: 'vi' | 'en';
+  infoData: WPInfo; // Thêm prop infoData để truyền dữ liệu từ HomePage
+  prefixWP: string; // Thêm prop prefixWP để truyền dữ liệu từ HomePage
   setLanguage: (lang: 'vi' | 'en') => void;
 }
 
-export default function Header({ language, setLanguage }: HeaderProps) {
+export default function Header({ language, infoData, prefixWP, setLanguage }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation(); // Get current location to construct new URLs
 
   const content = {
     vi: {
@@ -33,6 +38,13 @@ export default function Header({ language, setLanguage }: HeaderProps) {
   };
 
   const t = content[language];
+
+  // Function to generate language-prefixed URLs
+  const getLocalizedHref = (href: string) => {
+    // Remove existing language prefix if any, then add the current one
+    const pathWithoutLang = location.pathname.replace(/^\/(vi|en)/, '');
+    return `/${language}${pathWithoutLang.startsWith('/') ? '' : '/'}${href}`;
+  };
 
   const navItems = [
     { label: t.nav.home, href: '#hero' },
@@ -59,14 +71,14 @@ export default function Header({ language, setLanguage }: HeaderProps) {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex items-center gap-3 cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer" // Still scroll to hero on logo click
             onClick={() => handleNavClick('#hero')}
           >
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-xl">V</span>
             </div>
             <div>
-              <h1 className="font-heading text-xl font-bold text-foreground">Vibe Code Studio</h1>
+              <h1 className="font-heading text-xl font-bold text-foreground">{infoData[`${prefixWP}tencongty`]}</h1>
             </div>
           </motion.div>
 
@@ -78,7 +90,7 @@ export default function Header({ language, setLanguage }: HeaderProps) {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                onClick={() => handleNavClick(item.href)}
+                onClick={() => handleNavClick(item.href)} // For anchor links, we still want to scroll within the current page
                 className="text-foreground/80 hover:text-primary transition-colors font-medium"
               >
                 {item.label}
@@ -95,7 +107,7 @@ export default function Header({ language, setLanguage }: HeaderProps) {
               className="flex items-center gap-2 bg-primary/10 rounded-lg p-1"
             >
               <button
-                onClick={() => setLanguage('vi')}
+                onClick={() => setLanguage('vi')} // Use the setLanguage prop from HomePage
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                   language === 'vi'
                     ? 'bg-primary text-primary-foreground'
@@ -105,7 +117,7 @@ export default function Header({ language, setLanguage }: HeaderProps) {
                 VI
               </button>
               <button
-                onClick={() => setLanguage('en')}
+                onClick={() => setLanguage('en')} // Use the setLanguage prop from HomePage
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                   language === 'en'
                     ? 'bg-primary text-primary-foreground'

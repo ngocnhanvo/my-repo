@@ -1,6 +1,7 @@
 import { WPInfo } from '@/entities/wordpress';
 import { motion } from 'framer-motion';
 import { Code, Zap, Globe } from 'lucide-react';
+import { useLocation } from 'react-router-dom'; // Import useLocation
 
 interface FooterProps {
   language: 'vi' | 'en';
@@ -9,10 +10,11 @@ interface FooterProps {
 }
 
 export default function Footer({ language, infoData, prefixWP }: FooterProps) {
+  const location = useLocation();
   const content = {
     vi: {
       tagline: 'Tốc độ AI & Chất lượng Developer',
-      copyright: '© 2026 Vibe Code Studio. Tất cả quyền được bảo lưu.',
+      copyright: `© 2026 ${infoData[`${prefixWP}tencongty`]}. Tất cả quyền được bảo lưu.`,
       links: {
         services: 'Dịch Vụ',
         about: 'Về Chúng Tôi',
@@ -26,7 +28,7 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
     },
     en: {
       tagline: 'AI Speed & Developer Quality',
-      copyright: '© 2026 Vibe Code Studio. All rights reserved.',
+      copyright: `© 2026 ${infoData[`${prefixWP}tencongty`]}. All rights reserved.`,
       links: {
         services: 'Services',
         about: 'About Us',
@@ -41,6 +43,12 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
   };
 
   const t = content[language];
+
+  // Function to generate language-prefixed URLs for anchor links
+  const getLocalizedAnchorHref = (anchorId: string) => {
+    const pathWithoutLang = location.pathname.replace(/^\/(vi|en)/, '');
+    return `/${language}${pathWithoutLang.split('#')[0]}${anchorId}`;
+  };
 
   return (
     <footer className="relative w-full bg-gradient-to-t from-background via-primary/5 to-background border-t border-primary/20">
@@ -59,7 +67,7 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
                 <span className="text-primary-foreground font-bold text-2xl">V</span>
               </div>
               <div>
-                <h3 className="font-heading text-xl font-bold text-foreground">Vibe Code Studio</h3>
+                <h3 className="font-heading text-xl font-bold text-foreground">{infoData[`${prefixWP}tencongty`]}</h3>
               </div>
             </div>
             <p className="text-foreground/70 text-sm leading-relaxed">
@@ -142,12 +150,12 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
                 </button>
               </li>
               <li>
-                <a href="#" className="text-foreground/70 hover:text-primary transition-colors text-sm">
+                <a href={getLocalizedAnchorHref('#privacy')} className="text-foreground/70 hover:text-primary transition-colors text-sm">
                   {t.links.privacy}
                 </a>
               </li>
               <li>
-                <a href="#" className="text-foreground/70 hover:text-primary transition-colors text-sm">
+                <a href={getLocalizedAnchorHref('#terms')} className="text-foreground/70 hover:text-primary transition-colors text-sm">
                   {t.links.terms}
                 </a>
               </li>
