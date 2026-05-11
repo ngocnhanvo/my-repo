@@ -21,25 +21,35 @@ export async function getProcessSteps() {
       absoluteImageUrl = `${WC_URL.replace(/\/$/, '')}${absoluteImageUrl}`;
     }
 
-    if (absoluteImageUrl) {
-      const filename = absoluteImageUrl.split('/').pop();
-      // LƯU Ý: Nên dùng thư mục public/images để Astro tự quản lý khi build
-      const publicDir = path.resolve('public/images');
-      const localPath = path.join(publicDir, filename);
-      const publicUrl = `/images/${filename}`;
+    let finalImageUrl = absoluteImageUrl;
 
-      try {
-        if (!existsSync(publicDir)) {
-          mkdirSync(publicDir, { recursive: true });
+    if (absoluteImageUrl) {
+      const filename = absoluteImageUrl.split('/').pop()?.split('?')[0];
+      // LƯU Ý: Nên dùng thư mục public/images để Astro tự quản lý khi build
+      if (filename) {
+        const publicDir = path.resolve('public/images');
+        const localPath = path.join(publicDir, filename);
+        const publicUrl = `/images/${filename}`;
+
+        try {
+          if (!existsSync(publicDir)) {
+            mkdirSync(publicDir, { recursive: true });
+          }
+          
+          // Nếu file đã tồn tại thì dùng luôn đường dẫn local, không fetch lại
+          if (existsSync(localPath)) {
+            finalImageUrl = publicUrl;
+          } else {
+            const res = await fetch(absoluteImageUrl);
+            if (res.ok) {
+              const buffer = await res.arrayBuffer();
+              writeFileSync(localPath, Buffer.from(buffer));
+              finalImageUrl = publicUrl;
+            }
+          }
+        } catch (err) {
+          console.error(`Không thể tải ảnh: ${absoluteImageUrl}`, err);
         }
-        const res = await fetch(absoluteImageUrl);
-        if (res.ok) {
-          const buffer = await res.arrayBuffer();
-          writeFileSync(localPath, Buffer.from(buffer));
-        }
-      } 
-      catch (err) {
-      
       }
     }
 
@@ -52,7 +62,7 @@ export async function getProcessSteps() {
       benefit: step.acf.benefit || '',
       en_benefit: step.acf.en_benefit || '',
       order: step.acf.order || 0,
-      image: absoluteImageUrl
+      image: finalImageUrl
     };
   }));
 }

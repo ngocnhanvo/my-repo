@@ -1,15 +1,15 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
-import cloudProviderFetchAdapter from "@wix/cloud-provider-fetch-adapter";
-import wix from "@wix/astro";
-import monitoring from "@wix/monitoring-astro";
+//import cloudProviderFetchAdapter from "@wix/cloud-provider-fetch-adapter";
+//import wix from "@wix/astro";
+//import monitoring from "@wix/monitoring-astro";
 import react from "@astrojs/react";
 import sourceAttrsPlugin from "@wix/babel-plugin-jsx-source-attrs";
 import dynamicDataPlugin from "@wix/babel-plugin-jsx-dynamic-data";
 import customErrorOverlayPlugin from "./vite-error-overlay-plugin.js";
 import postcssPseudoToData from "@wix/postcss-pseudo-to-data";
-import cloudflare from "@astrojs/cloudflare";
+//import cloudflare from "@astrojs/cloudflare";
 import { loadEnv } from 'vite';
 
 // Load biến môi trường
