@@ -30,11 +30,11 @@ export default {
                 'muted-grey': '#4A4A4A',
                 'muted-grey-foreground': '#CCCCCC',
                 background: '#1A1A1A',
-                secondary: '#FF00FF',
+                secondary: '#ff48ff',
                 foreground: '#E0E0E0',
                 'secondary-foreground': '#FFFFFF',
                 'primary-foreground': '#000000',
-                primary: '#00FFCC'
+                primary: '#51ffdc'
             },
         },
     },

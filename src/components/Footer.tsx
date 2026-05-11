@@ -1,7 +1,7 @@
 import { WPInfo } from '@/entities/wordpress';
 import { motion } from 'framer-motion';
 import { Code, Zap, Globe } from 'lucide-react';
-import { useLocation } from 'react-router-dom'; // Import useLocation
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface FooterProps {
   language: 'vi' | 'en';
@@ -11,6 +11,7 @@ interface FooterProps {
 
 export default function Footer({ language, infoData, prefixWP }: FooterProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const content = {
     vi: {
       tagline: 'Tốc độ AI & Chất lượng Developer',
@@ -50,6 +51,19 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
     return `/${language}${pathWithoutLang.split('#')[0]}${anchorId}`;
   };
 
+  const handleNavClick = (anchorId: string) => {
+    const isHomePage = location.pathname === `/${language}` || location.pathname === `/${language}/`;
+    
+    if (isHomePage) {
+      const element = document.getElementById(anchorId.replace('#', ''));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(`/${language}`, { state: { scrollTo: anchorId.replace('#', '') }, preventScrollReset: true });
+    }
+  };
+
   return (
     <footer className="relative w-full bg-gradient-to-t from-background via-primary/5 to-background border-t border-primary/20">
       <div className="w-full max-w-[120rem] mx-auto px-8 py-16">
@@ -64,7 +78,15 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
           >
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-2xl">V</span>
+                {infoData.logo ? (
+                  <img 
+                    src={infoData.logo} 
+                    alt={infoData[`${prefixWP}tencongty`] || 'Logo'} 
+                    className="w-full h-full object-contain p-1.5"
+                  />
+                ) : (
+                  <span className="text-primary-foreground font-bold text-xl">V</span>
+                )}
               </div>
               <div>
                 <h3 className="font-heading text-xl font-bold text-foreground">{infoData[`${prefixWP}tencongty`]}</h3>
@@ -98,7 +120,7 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
             <ul className="space-y-2">
               <li>
                 <button
-                  onClick={() => document.getElementById('process')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => handleNavClick('#process')}
                   className="text-foreground/70 hover:text-primary transition-colors text-sm"
                 >
                   {language === 'vi' ? 'Quy Trình Làm Việc' : 'Workflow Process'}
@@ -106,7 +128,7 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
               </li>
               <li>
                 <button
-                  onClick={() => document.getElementById('comparison')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => handleNavClick('#comparison')}
                   className="text-foreground/70 hover:text-primary transition-colors text-sm"
                 >
                   {language === 'vi' ? 'So Sánh Dịch Vụ' : 'Service Comparison'}
@@ -114,7 +136,7 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
               </li>
               <li>
                 <button
-                  onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => handleNavClick('#pricing')}
                   className="text-foreground/70 hover:text-primary transition-colors text-sm"
                 >
                   {language === 'vi' ? 'Bảng Giá' : 'Pricing'}
@@ -135,27 +157,27 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
             <ul className="space-y-2">
               <li>
                 <button
-                  onClick={() => document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => handleNavClick('#hero')}
                   className="text-foreground/70 hover:text-primary transition-colors text-sm"
                 >
                   {language === 'vi' ? 'Giới Thiệu' : 'About'}
                 </button>
               </li>
               <li>
-                <button
-                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                <a
+                  href={`/${language}/contact`} // Điều hướng đến trang /contact
                   className="text-foreground/70 hover:text-primary transition-colors text-sm"
                 >
                   {t.links.contact}
-                </button>
+                </a>
               </li>
               <li>
-                <a href={getLocalizedAnchorHref('#privacy')} className="text-foreground/70 hover:text-primary transition-colors text-sm">
+                <a href={`/${language}/privacy`} className="text-foreground/70 hover:text-primary transition-colors text-sm">
                   {t.links.privacy}
                 </a>
               </li>
               <li>
-                <a href={getLocalizedAnchorHref('#terms')} className="text-foreground/70 hover:text-primary transition-colors text-sm">
+                <a href={`/${language}/terms`} className="text-foreground/70 hover:text-primary transition-colors text-sm">
                   {t.links.terms}
                 </a>
               </li>
@@ -201,10 +223,10 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
               {t.copyright}
             </p>
             <div className="flex items-center gap-6">
-              <a href="#" className="text-foreground/60 hover:text-primary transition-colors text-sm">
+              <a href={`/${language}/privacy`} className="text-foreground/60 hover:text-primary transition-colors text-sm">
                 {t.links.privacy}
               </a>
-              <a href="#" className="text-foreground/60 hover:text-primary transition-colors text-sm">
+              <a href={`/${language}/terms`} className="text-foreground/60 hover:text-primary transition-colors text-sm">
                 {t.links.terms}
               </a>
             </div>

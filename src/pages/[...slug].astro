@@ -6,37 +6,80 @@ import AppRouter from '../components/Router';
 import { getProcessSteps } from '../lib/wordpress/quytrinh';
 import { getCompre } from '../lib/wordpress/sosanh';
 import { getInfo } from '../lib/wordpress/trangchu';
+import { getPrivacyPage } from '../lib/wordpress/chinhsachbaomat';
+import { getTermsPage } from '../lib/wordpress/chinhsachdichvu';
 
-let WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
-const data_process_steps = await getProcessSteps();
-const data_compre = await getCompre();
-const data_info = await getInfo();
-
 export async function getStaticPaths() {
   const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
+  const data_process_steps = await getProcessSteps();
+  const data_compre = await getCompre();
+  const data_info = await getInfo();
+  const data_privacy = await getPrivacyPage();
+  const data_terms = await getTermsPage();
+
+  const commonProps = {
+    type: 'home',
+    data_process_steps,
+    data_compre,
+    data_info,
+    data_privacy,
+    data_terms,
+    title: `${data_info[0]?.['tencongty'] || 'Vibe Code Studio'} – Tốc Độ AI, Chất Lượng Developer`,
+    description: 'Xây dựng website chuyên nghiệp với sức mạnh AI và tay nghề chuyên gia. Hệ thống rèn đúc kỹ thuật số kết hợp AI tiên tiến với kinh nghiệm phát triển web chuyên sâu.',
+    ogImage: `${WC_URL}/wp-content/uploads/og-image.jpg`,
+    baseUrl: WC_URL,
+  };
 
   return [
     {
       params: { slug: undefined },
-      props: {
-        type: 'home',
-        title: 'Vibe Code Studio – Tốc Độ AI, Chất Lượng Developer',
-        description: 'Xây dựng website chuyên nghiệp với sức mạnh AI và tay nghề chuyên gia. Hệ thống rèn đúc kỹ thuật số kết hợp AI tiên tiến với kinh nghiệm phát triển web chuyên sâu.',
-        ogImage: `${WC_URL}/wp-content/uploads/og-image.jpg`, // đổi đường dẫn ảnh OG nếu có
-        baseUrl: WC_URL,
-      },
+      props: commonProps,
     },
+    {
+      params: { slug: 'vi' },
+      props: commonProps,
+    },
+    {
+      params: { slug: 'en' },
+      props: commonProps,
+    },
+    {
+      params: { slug: 'vi/privacy' },
+      props: commonProps,
+    },
+    {
+      params: { slug: 'en/privacy' },
+      props: commonProps,
+    },
+    {
+      params: { slug: 'vi/terms' },
+      props: commonProps,
+    },
+    {
+      params: { slug: 'en/terms' },
+      props: commonProps,
+    },
+    {
+      params: { slug: 'vi/contact' },
+      props: commonProps,
+    },
+    {
+      params: { slug: 'en/contact' },
+      props: commonProps,
+    }
   ];
 }
 
-const { type, title, description, ogImage } = Astro.props;
+const { type, title, description, ogImage, data_process_steps, data_compre, data_info, data_privacy, data_terms, baseUrl } = Astro.props;
 const { slug } = Astro.params;
+const lang = slug?.split('/')[0] === 'en' ? 'en' : 'vi';
+const locale = lang === 'en' ? 'en_US' : 'vi_VN';
 
 const currentPageUrl = slug ? `${WC_URL_CLIENT}/${slug}` : WC_URL_CLIENT;
 ---
 
-<html lang="vi" class="w-full h-full">
+<html lang={lang} class="w-full h-full">
   <head>
     <Head />
 
@@ -45,13 +88,18 @@ const currentPageUrl = slug ? `${WC_URL_CLIENT}/${slug}` : WC_URL_CLIENT;
     <meta name="description" content={description} />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href={currentPageUrl} />
+    <link
+        id="favicon"
+        rel="shortcut icon"
+        href=`${data_info[0]?.['favicon'] || '/favicon.ico'}`
+    />
 
     <!-- Open Graph (Facebook, Zalo, LinkedIn) -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={currentPageUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:locale" content={locale} />
     {ogImage && <meta property="og:image" content={ogImage} />}
     {ogImage && <meta property="og:image:width" content="1200" />}
     {ogImage && <meta property="og:image:height" content="630" />}
@@ -63,17 +111,17 @@ const currentPageUrl = slug ? `${WC_URL_CLIENT}/${slug}` : WC_URL_CLIENT;
     <meta name="twitter:description" content={description} />
     {ogImage && <meta name="twitter:image" content={ogImage} />}
 
-    <!-- JSON-LD Structured Data (Google) -->
+    <!-- JSON-LD Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "Vibe Code Studio",
+      "name": data_info[0]?.['tencongty'] || "Vibe Code Studio",
       "url": WC_URL_CLIENT,
       "description": description,
-      "inLanguage": "vi-VN",
+      "inLanguage": lang === 'en' ? 'en-US' : 'vi-VN',
       "publisher": {
         "@type": "Organization",
-        "name": "Vibe Code Studio",
+        "name": data_info[0]?.['tencongty'] || "Vibe Code Studio",
         "url": WC_URL_CLIENT,
         "contactPoint": {
           "@type": "ContactPoint",
@@ -95,7 +143,9 @@ const currentPageUrl = slug ? `${WC_URL_CLIENT}/${slug}` : WC_URL_CLIENT;
           data_process_steps={data_process_steps}
           data_compre={data_compre}
           data_info={data_info}
-          WC_URL={WC_URL}
+          data_privacy={data_privacy}
+          data_terms={data_terms}
+          WC_URL={baseUrl}
         />
       )}
     </div>

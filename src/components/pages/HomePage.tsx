@@ -1,13 +1,13 @@
 // HPI 1.7-G
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion'; // Removed AnimatePresence as it's not used here
 import { Button } from '@/components/ui/button';
 import { Check, AlertTriangle, Zap, Code, Globe, ArrowRight, Terminal, Cpu, Layers, ChevronRight } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { content } from '@/lib/wordpress/trangchu';
 import { WPProcessStep, WPComparison, WPInfo } from '@/entities';
-import { useOutletContext } from 'react-router-dom'; // Import useOutletContext
+import { useOutletContext, useLocation, useNavigate } from 'react-router-dom'; // Import useOutletContext, useLocation, useNavigate
 
 // 1. Định nghĩa kiểu dữ liệu cho Props
 interface HomePageProps {
@@ -24,6 +24,8 @@ interface OutletContextType {
 export default function HomePage({ data_process_steps, data_compre, data_info, WC_URL }: HomePageProps) {
   // Get language and setLanguage from OutletContext
   const { language, setLanguage } = useOutletContext<OutletContextType>();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [processSteps, setProcessSteps] = useState<WPProcessStep[]>([]);
   const [comparisonData, setComparisonData] = useState<WPComparison[]>([]);
   const [infoData, setDataInfo] = useState<WPInfo>({ id: 0 });
@@ -54,6 +56,20 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
   useEffect(() => {
     loadData();
   }, []);
+
+  // Xử lý cuộn trang dựa trên state truyền từ trang con về
+  useEffect(() => {
+    const state = location.state as { scrollTo?: string };
+    if (state?.scrollTo) {
+      const targetId = state.scrollTo;
+      const element = document.getElementById(targetId);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100); // Delay nhẹ để đảm bảo DOM đã sẵn sàng
+      }
+    }
+  }, [location.pathname, location.state]);
 
   const loadData = async () => {
     try {
@@ -178,7 +194,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
               <Button 
                 size="lg" 
                 className="clip-edge bg-primary text-primary-foreground hover:bg-primary/80 font-bold px-10 py-7 text-lg rounded-none transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,204,0.4)] group"
-                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => navigate(`/${language}/contact`)} // Điều hướng đến trang /contact
               >
                 <span className="flex items-center gap-3">
                   <Zap className="w-5 h-5 group-hover:animate-pulse" />
@@ -511,7 +527,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
                 </li>
                 <li className="flex items-center gap-3">
                   <ChevronRight className="w-4 h-4 text-accent-blue" />
-                  {language === 'vi' ? 'Tích hợp AI tự động hóa' : 'AI automation integration'}
+                  {language === 'vi' ? 'Ứng dụng AI trong phát triển website' : 'AI-assisted website development'}
                 </li>
                 <li className="flex items-center gap-3">
                   <ChevronRight className="w-4 h-4 text-accent-blue" />
@@ -578,7 +594,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
 
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
-              { icon: Globe, title: language === 'vi' ? 'Tọa Độ' : 'Coordinates', value: infoData[`${prefixWP}diachi`], color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/30' },
+              { icon: Globe, title: language === 'vi' ? 'Địa chỉ' : 'Address', value: infoData[`${prefixWP}diachi`], color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/30' },
               { icon: Code, title: language === 'vi' ? 'Email' : 'Email', value: infoData[`email`], color: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/30' },
               { icon: Zap, title: language === 'vi' ? 'Số Điện Thoại' : 'Phone Number', value: infoData[`sodienthoai`], color: 'text-accent-blue', bg: 'bg-accent-blue/10', border: 'border-accent-blue/30' }
             ].map((item, index) => (
@@ -609,7 +625,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
             <Button 
               size="lg" 
               className="clip-edge bg-white text-black hover:bg-gray-200 font-bold px-12 py-8 text-lg rounded-none transition-all duration-300"
-              onClick={() => window.location.href = `mailto:${t.contact.email}`}
+                onClick={() => navigate(`/${language}/contact`)} // Điều hướng đến trang /contact
             >
               <span className="flex items-center gap-3">
                 <Terminal className="w-5 h-5" />

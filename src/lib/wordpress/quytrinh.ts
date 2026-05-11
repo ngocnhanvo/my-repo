@@ -1,57 +1,37 @@
-// src/lib/wordpress.ts
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import path from 'path';
+import { processAndStoreImage } from './imageProcessor'; // Import the new utility function
 
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
 export async function getProcessSteps() {
-  const response = await fetch(
-    `${WC_URL}/wp-json/wp/v2/process_steps?_embed=true&v=${Date.now()}`,
-    { cache: 'no-store' }
-  );
-  
-  const raw_data = await response.json();
+  if (!WC_URL) {
+    console.error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables.');
+    return [];
+  }
+
+  let raw_data = [];
+  try {
+    const response = await fetch(
+      `${WC_URL}/wp-json/wp/v2/process_steps?_embed=true&v=${Date.now()}`,
+      { cache: 'no-store' }
+    );
+    if (!response.ok) throw new Error(`Server trả về lỗi: ${response.status}`);
+    raw_data = await response.json();
+  } catch (error) {
+    console.error(`❌ LỖI kết nối WordPress (${WC_URL}):`, error instanceof Error ? error.message : error);
+    // Trả về mảng rỗng thay vì làm sập toàn bộ quá trình build nếu bạn muốn build tiếp
+    return []; 
+  }
 
   return await Promise.all(raw_data.map(async (step: any) => {
     const media = step._embedded?.['wp:featuredmedia']?.[0];
     const imageUrl = media?.source_url;
     let absoluteImageUrl = imageUrl || '';
-
-    if (absoluteImageUrl.startsWith('/') && WC_URL) {
-      absoluteImageUrl = `${WC_URL.replace(/\/$/, '')}${absoluteImageUrl}`;
-    }
-
-    let finalImageUrl = absoluteImageUrl;
-
-    if (absoluteImageUrl) {
-      const filename = absoluteImageUrl.split('/').pop()?.split('?')[0];
-      // LƯU Ý: Nên dùng thư mục public/images để Astro tự quản lý khi build
-      if (filename) {
-        const publicDir = path.resolve('public/images');
-        const localPath = path.join(publicDir, filename);
-        const publicUrl = `/images/${filename}`;
-
-        try {
-          if (!existsSync(publicDir)) {
-            mkdirSync(publicDir, { recursive: true });
-          }
-          
-          // Nếu file đã tồn tại thì dùng luôn đường dẫn local, không fetch lại
-          if (existsSync(localPath)) {
-            finalImageUrl = publicUrl;
-          } else {
-            const res = await fetch(absoluteImageUrl);
-            if (res.ok) {
-              const buffer = await res.arrayBuffer();
-              writeFileSync(localPath, Buffer.from(buffer));
-              finalImageUrl = publicUrl;
-            }
-          }
-        } catch (err) {
-          console.error(`Không thể tải ảnh: ${absoluteImageUrl}`, err);
-        }
-      }
-    }
+    
+    const finalImageUrl = await processAndStoreImage({
+      imageUrl: absoluteImageUrl,
+      wcUrl: WC_URL,
+      publicDirBase: 'images/quytrinh', // Lưu ảnh quy trình vào thư mục riêng
+    });
 
     return {
       id: step.id,

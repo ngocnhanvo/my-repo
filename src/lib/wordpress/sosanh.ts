@@ -2,6 +2,11 @@
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
 export async function getCompre() {
+  if (!WC_URL) {
+    console.error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables.');
+    return [];
+  }
+  
   const response = await fetch(
     `${WC_URL}/wp-json/wp/v2/so-sanh?_embed=true&v=${Date.now()}`,
     { cache: 'no-store' }

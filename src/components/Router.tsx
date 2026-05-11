@@ -1,8 +1,10 @@
 import { MemberProvider } from '@/integrations';
-import { createBrowserRouter, RouterProvider, Navigate, Outlet, useParams, useLocation, useNavigate } from 'react-router-dom';
-import { ScrollToTop } from '@/lib/scroll-to-top';
-import ErrorPage from '@/integrations/errorHandlers/ErrorPage';
+import { createBrowserRouter, RouterProvider, Navigate, Outlet, useParams, useLocation, useNavigate, ScrollRestoration } from 'react-router-dom';
+import ErrorPage from '@/integrations/errorHandlers/ErrorPage'; // Keep ErrorPage
 import HomePage from '@/components/pages/HomePage';
+import PrivacyPage from '@/components/pages/PrivacyPage';
+import TermsPage from '@/components/pages/TermsPage';
+import ContactPage from '@/components/pages/ContactPage';
 import React, { useState, useEffect } from 'react'; // Import React, useState, useEffect
 import { WPProcessStep, WPComparison, WPInfo } from '@/entities';
 
@@ -11,6 +13,8 @@ interface AppRouterProps {
   data_compre: WPComparison[];
   data_info: WPInfo[];
   WC_URL: string;
+  data_privacy?: any; // Thêm thuộc tính data_privacy vào interface
+  data_terms?: any;
 }
 
 // Layout component that includes ScrollToTop
@@ -30,12 +34,12 @@ function LayoutWithLanguage() {
     } else {
       pathSegments.unshift(newLang); // Add language segment if not present
     }
-    navigate(`/${pathSegments.join('/')}${location.search}${location.hash}`);
+    navigate(`/${pathSegments.join('/')}${location.search}${location.hash}`, { preventScrollReset: true });
   };
 
   return (
     <>
-      <ScrollToTop />
+      <ScrollRestoration />
       <Outlet context={{ language: currentLang, setLanguage }} /> {/* Pass language and setLanguage via context */}
     </>
   );
@@ -54,6 +58,18 @@ const getRouterConfig = (props: AppRouterProps) => ([
       {
         path: ":lang", // Route for language prefix
         element: <HomePage {...props} />,
+      },
+      {
+        path: ":lang/privacy",
+        element: <PrivacyPage {...props} />,
+      },
+      {
+        path: ":lang/terms",
+        element: <TermsPage {...props} />,
+      },
+      {
+        path: ":lang/contact",
+        element: <ContactPage {...props} />,
       },
       {
         path: ":lang/*", // Catch-all for other paths with language prefix

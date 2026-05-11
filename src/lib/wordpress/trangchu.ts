@@ -1,6 +1,6 @@
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import path from 'path';
-const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
+import { processAndStoreImage } from './imageProcessor'; // Import the new utility function
+
+const WC_URL = import.meta.env.WC_URL || process.env.WC_URL; // Keep WC_URL
 export const content = {
     vi: {
       hero: {
@@ -77,6 +77,11 @@ export const content = {
   };
 
 export async function getInfo() {
+  if (!WC_URL) {
+    console.error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables.');
+    return [];
+  }
+
   const response = await fetch(
     `${WC_URL}/wp-json/wp/v2/thong-tin-chung?_embed=true&v=${Date.now()}`,
     { cache: 'no-store' }
@@ -85,15 +90,31 @@ export async function getInfo() {
   const raw_data = await response.json();
 
   return await Promise.all(raw_data.map(async (item: any) => {
-    item.tencongty = item.acf.tencongty || '';
-    item.en_tencongty = item.acf.en_tencongty || '';
-    item.diachi = item.acf.diachi || '';
-    item.en_diachi = item.acf.en_diachi || '';
-    item.sodienthoai = item.acf.sodienthoai || '';
-    item.email = item.acf.email || '';
-    item.logo = item.acf.logo || '';
-    item.favicon = item.acf.favicon || '';
-    item.order = item.acf.order || 0;
-    return item;
+    const logoUrl = item.acf.logo.url || '';
+    const faviconUrl = item.acf.favicon.url || '';
+
+    const processedLogoUrl = await processAndStoreImage({
+      imageUrl: logoUrl,
+      wcUrl: WC_URL,
+      publicDirBase: 'images/info', // Lưu ảnh logo/favicon vào thư mục riêng
+    });
+    const processedFaviconUrl = await processAndStoreImage({
+      imageUrl: faviconUrl,
+      wcUrl: WC_URL,
+      publicDirBase: 'images/info', // Lưu ảnh logo/favicon vào thư mục riêng
+    });
+
+    return {
+      ...item, // Giữ lại các thuộc tính gốc
+      tencongty: item.acf.tencongty || '',
+      en_tencongty: item.acf.en_tencongty || '',
+      diachi: item.acf.diachi || '',
+      en_diachi: item.acf.en_diachi || '',
+      sodienthoai: item.acf.sodienthoai || '',
+      email: item.acf.email || '',
+      logo: processedLogoUrl,
+      favicon: processedFaviconUrl,
+      order: item.acf.order || 0,
+    };
   }));
 }

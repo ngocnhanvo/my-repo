@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Globe } from 'lucide-react';
 import { WPInfo } from '@/entities';
-import { useLocation } from 'react-router-dom'; // Import useLocation
+import { useLocation, useNavigate } from 'react-router-dom'; // Import useLocation, useNavigate
 
 interface HeaderProps {
   language: 'vi' | 'en';
@@ -15,6 +15,7 @@ interface HeaderProps {
 export default function Header({ language, infoData, prefixWP, setLanguage }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation(); // Get current location to construct new URLs
+  const navigate = useNavigate();
 
   const content = {
     vi: {
@@ -51,14 +52,25 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
     { label: t.nav.process, href: '#process' },
     { label: t.nav.comparison, href: '#comparison' },
     { label: t.nav.pricing, href: '#pricing' },
-    { label: t.nav.contact, href: '#contact' }
+    { label: t.nav.contact, href: '/contact' } // Thay đổi để dẫn đến trang /contact
   ];
 
   const handleNavClick = (href: string) => {
     setIsMenuOpen(false);
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    const targetId = href.replace('#', '');
+    const isHomePage = location.pathname === `/${language}` || location.pathname === `/${language}/`;
+    
+    if (href.startsWith('#')) { // Đây là một liên kết neo (anchor)
+      if (isHomePage) { // Nếu đang ở trang chủ, cuộn đến vị trí
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else { // Nếu không ở trang chủ, điều hướng về trang chủ và cuộn
+        navigate(`/${language}`, { state: { scrollTo: targetId }, preventScrollReset: true });
+      }
+    } else { // Đây là một đường dẫn trang (ví dụ: /contact)
+      navigate(`/${language}${href}`);
     }
   };
 
@@ -74,8 +86,16 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
             className="flex items-center gap-3 cursor-pointer" // Still scroll to hero on logo click
             onClick={() => handleNavClick('#hero')}
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xl">V</span>
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center overflow-hidden">
+              {infoData.logo ? (
+                <img 
+                  src={infoData.logo} 
+                  alt={infoData[`${prefixWP}tencongty`] || 'Logo'} 
+                  className="w-full h-full object-contain p-1.5"
+                />
+              ) : (
+                <span className="text-primary-foreground font-bold text-xl">V</span>
+              )}
             </div>
             <div>
               <h1 className="font-heading text-xl font-bold text-foreground">{infoData[`${prefixWP}tencongty`]}</h1>
