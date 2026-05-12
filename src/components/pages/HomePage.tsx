@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion'; // Removed AnimatePresence as it's not used here
 import { Button } from '@/components/ui/button';
-import { Check, AlertTriangle, Zap, Code, Globe, ArrowRight, Terminal, Cpu, Layers, ChevronRight } from 'lucide-react';
+import { Check, AlertTriangle, Zap, Code, Globe, ArrowRight, Terminal, Cpu, Layers, ChevronRight, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { content } from '@/lib/wordpress/trangchu';
@@ -57,19 +57,23 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
     loadData();
   }, []);
 
-  // Xử lý cuộn trang dựa trên state truyền từ trang con về
+  // Xử lý cuộn trang khi quay lại từ trang khác hoặc nhấn link từ Footer/Header
   useEffect(() => {
-    const state = location.state as { scrollTo?: string };
-    if (state?.scrollTo) {
-      const targetId = state.scrollTo;
-      const element = document.getElementById(targetId);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }, 100); // Delay nhẹ để đảm bảo DOM đã sẵn sàng
+    if (!isLoadingSteps && !isLoadingComparison) {
+      const state = location.state as { scrollTo?: string };
+      const targetId = state?.scrollTo || (location.hash ? location.hash.replace('#', '') : null);
+
+      if (targetId) {
+        const element = document.getElementById(targetId);
+        if (element) {
+          // Sử dụng requestAnimationFrame để đảm bảo trình duyệt đã vẽ xong layout mới nhất
+          requestAnimationFrame(() => {
+            element.scrollIntoView({ behavior: 'smooth' });
+          });
+        }
       }
     }
-  }, [location.pathname, location.state]);
+  }, [isLoadingSteps, isLoadingComparison, location.state, location.hash]);
 
   const loadData = async () => {
     try {
@@ -562,7 +566,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
                 <Button 
                   size="lg" 
                   className="w-full clip-edge bg-accent-blue text-white hover:bg-accent-blue/80 font-bold px-12 py-8 text-lg rounded-none transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,123,255,0.4)]"
-                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => navigate(`/${language}/products`)}
                 >
                   {t.pricing.contact}
                 </Button>
@@ -594,24 +598,56 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
 
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
-              { icon: Globe, title: language === 'vi' ? 'Địa chỉ' : 'Address', value: infoData[`${prefixWP}diachi`], color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/30' },
-              { icon: Code, title: language === 'vi' ? 'Email' : 'Email', value: infoData[`email`], color: 'text-secondary', bg: 'bg-secondary/10', border: 'border-secondary/30' },
-              { icon: Zap, title: language === 'vi' ? 'Số Điện Thoại' : 'Phone Number', value: infoData[`sodienthoai`], color: 'text-accent-blue', bg: 'bg-accent-blue/10', border: 'border-accent-blue/30' }
+              { 
+                icon: Globe, 
+                title: language === 'vi' ? 'Địa chỉ' : 'Address', 
+                value: infoData[`${prefixWP}diachi`], 
+                color: 'text-primary', 
+                bg: 'bg-primary/10', 
+                border: 'border-primary/30',
+                href: "https://www.google.com/maps/search/?api=1&query=10.877367565856778,106.76548063620464"
+              },
+              { 
+                icon: Code, 
+                title: language === 'vi' ? 'Email' : 'Email', 
+                value: infoData[`email`], 
+                color: 'text-secondary', 
+                bg: 'bg-secondary/10', 
+                border: 'border-secondary/30',
+                href: infoData[`email`] ? `mailto:${infoData[`email`]}` : undefined
+              },
+              { 
+                icon: Zap, 
+                title: language === 'vi' ? 'Số Điện Thoại' : 'Phone Number', 
+                value: infoData[`sodienthoai`], 
+                color: 'text-accent-blue', 
+                bg: 'bg-accent-blue/10', 
+                border: 'border-accent-blue/30',
+                href: infoData[`sodienthoai`] ? `tel:${infoData[`sodienthoai`]}` : undefined
+              }
             ].map((item, index) => (
-              <motion.div
+              <motion.a
                 key={index}
+                href={item.href}
+                target={item.href?.startsWith('http') ? "_blank" : undefined}
+                rel={item.href?.startsWith('http') ? "noopener noreferrer" : undefined}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className={`glass-panel p-8 border-t-2 ${item.border} hover:bg-white/[0.02] transition-colors group cursor-default`}
+                className={`relative glass-panel p-8 border-t-2 ${item.border} hover:bg-white/[0.05] transition-all group ${item.href ? 'cursor-pointer hover:border-white/40' : 'cursor-default'}`}
               >
+                {item.href && item.href.startsWith('http') && (
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-40 transition-opacity">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                )}
                 <div className={`w-12 h-12 ${item.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                   <item.icon className={`w-6 h-6 ${item.color}`} />
                 </div>
                 <h3 className="font-mono text-sm text-foreground/50 uppercase tracking-wider mb-2">{item.title}</h3>
                 <p className="text-foreground font-medium text-lg break-words">{item.value}</p>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
 

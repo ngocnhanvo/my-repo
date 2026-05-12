@@ -1,7 +1,7 @@
 import { WPInfo } from '@/entities/wordpress';
 import { motion } from 'framer-motion';
 import { Code, Zap, Globe } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 
 interface FooterProps {
   language: 'vi' | 'en';
@@ -156,30 +156,27 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
             <h4 className="font-heading text-lg font-bold text-foreground">{t.links.about}</h4>
             <ul className="space-y-2">
               <li>
-                <button
-                  onClick={() => handleNavClick('#hero')}
-                  className="text-foreground/70 hover:text-primary transition-colors text-sm"
-                >
-                  {language === 'vi' ? 'Giới Thiệu' : 'About'}
-                </button>
+                <Link to={`/${language}/about`} className="text-foreground/70 hover:text-primary transition-colors text-sm">
+                  {t.links.about}
+                </Link>
               </li>
               <li>
-                <a
-                  href={`/${language}/contact`} // Điều hướng đến trang /contact
+                <Link
+                  to={`/${language}/contact`}
                   className="text-foreground/70 hover:text-primary transition-colors text-sm"
                 >
                   {t.links.contact}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href={`/${language}/privacy`} className="text-foreground/70 hover:text-primary transition-colors text-sm">
+                <Link to={`/${language}/privacy`} className="text-foreground/70 hover:text-primary transition-colors text-sm">
                   {t.links.privacy}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href={`/${language}/terms`} className="text-foreground/70 hover:text-primary transition-colors text-sm">
+                <Link to={`/${language}/terms`} className="text-foreground/70 hover:text-primary transition-colors text-sm">
                   {t.links.terms}
-                </a>
+                </Link>
               </li>
             </ul>
           </motion.div>
@@ -223,12 +220,12 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
               {t.copyright}
             </p>
             <div className="flex items-center gap-6">
-              <a href={`/${language}/privacy`} className="text-foreground/60 hover:text-primary transition-colors text-sm">
+              <Link to={`/${language}/privacy`} className="text-foreground/60 hover:text-primary transition-colors text-sm">
                 {t.links.privacy}
-              </a>
-              <a href={`/${language}/terms`} className="text-foreground/60 hover:text-primary transition-colors text-sm">
+              </Link>
+              <Link to={`/${language}/terms`} className="text-foreground/60 hover:text-primary transition-colors text-sm">
                 {t.links.terms}
-              </a>
+              </Link>
             </div>
           </div>
         </motion.div>

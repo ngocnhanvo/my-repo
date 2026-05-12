@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { WPInfo } from '@/entities'; // Removed unused imports
+import { WPInfo, WPProcessStep, WPComparison } from '@/entities';
 import { useOutletContext } from 'react-router-dom';
 
 interface TermsPageProps {

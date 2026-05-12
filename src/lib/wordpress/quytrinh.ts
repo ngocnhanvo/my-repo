@@ -23,9 +23,7 @@ export async function getProcessSteps() {
   }
 
   return await Promise.all(raw_data.map(async (step: any) => {
-    const media = step._embedded?.['wp:featuredmedia']?.[0];
-    const imageUrl = media?.source_url;
-    let absoluteImageUrl = imageUrl || '';
+    const absoluteImageUrl = step.acf.image?.url || '';
     
     const finalImageUrl = await processAndStoreImage({
       imageUrl: absoluteImageUrl,

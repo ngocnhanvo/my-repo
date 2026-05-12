@@ -21,18 +21,23 @@ export const BaseCrudService = {
    * @returns Object chứa mảng items để tương thích với pattern của Wix.
    */
   async get_WPProcessSteps<T extends WPProcessStep[]>(queryParams: string = ''): Promise<T> {
-    const response = await fetch(`${API_BASE}?type=process_steps&${queryParams}`);
+    try {
+      const response = await fetch(`${API_BASE}?type=process_steps&${queryParams}`);
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Failed to load WPProcessSteps: ${errorBody}`);
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Failed to load WPProcessSteps: ${response.status} ${response.statusText} - ${errorBody}`);
+      }
+      const json = (await response.json()) as WPProcessStepResponse;
+      return json.items as T;
+    } catch (error) {
+      console.error(`❌ LỖI nghiêm trọng khi fetch WPProcessSteps từ CMS:`, error);
+      throw error; // Re-throw to fail the build
     }
-    const json = (await response.json()) as WPProcessStepResponse;
-    return json.items as T;
   },
   async get_WPComparison<T extends WPComparison[]>(queryParams: string = ''): Promise<T> {
 
-    return [] as T;
+    return [{}] as T;
   }
 };
 

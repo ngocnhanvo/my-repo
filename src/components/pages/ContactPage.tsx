@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { WPInfo, WPProcessStep, WPComparison } from '@/entities';
-import { useOutletContext, useNavigate } from 'react-router-dom';
+import { useOutletContext, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Phone, User, MessageSquare, Loader2, CheckCircle2, Home, ArrowRight, Mail } from 'lucide-react';
 
@@ -21,6 +21,7 @@ interface OutletContextType {
 export default function ContactPage({ data_info }: ContactPageProps) {
   const { language, setLanguage } = useOutletContext<OutletContextType>();
   const navigate = useNavigate();
+  const location = useLocation();
   const infoData = data_info[0] || { id: 0 };
   const prefixWP = language === 'en' ? 'en_' : '';
 
@@ -34,6 +35,16 @@ export default function ContactPage({ data_info }: ContactPageProps) {
     const vnPhoneRegex = /^(0|(\+84))(3|5|7|8|9)([0-9]{8})$/;
     return vnPhoneRegex.test(phone.replace(/\s/g, ''));
   };
+
+  // Tự động điền tin nhắn nếu có dữ liệu truyền từ trang sản phẩm
+  useEffect(() => {
+    const state = location.state as { prefillMessage?: string };
+    if (state?.prefillMessage) {
+      setFormData(prev => ({ ...prev, message: state.prefillMessage }));
+      // Xóa state sau khi đã điền để tránh việc load lại trang vẫn giữ tin nhắn cũ
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     let timer: any;

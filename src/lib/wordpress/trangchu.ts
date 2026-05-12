@@ -3,6 +3,11 @@ import { processAndStoreImage } from './imageProcessor'; // Import the new utili
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL; // Keep WC_URL
 export const content = {
     vi: {
+      nav: {
+        home: 'Trang Chủ',
+        about: 'Giới Thiệu',
+        contact: 'Liên Hệ'
+      },
       hero: {
         title1: 'Tốc Độ AI',
         title2: 'Chất Lượng Developer',
@@ -17,17 +22,17 @@ export const content = {
       },
       comparison: {
         title: 'Phân Tích Hiệu Suất',
-        subtitle: 'Đánh giá năng lực cốt lõi: Vibe Code Studio vs Nền tảng tiêu chuẩn',
+        subtitle: 'Đánh giá năng lực cốt lõi: Chúng tôi vs Nền tảng tiêu chuẩn',
         feature: 'Tiêu chí so sánh',
         vibeStudio: 'Chúng tôi',
-        standardWix: 'Wix Tiêu Chuẩn'
+        standardWix: 'Nền tảng tiêu chuẩn'
       },
       pricing: {
         title: 'Gói Triển Khai',
         subtitle: 'Cấu hình tối ưu cho mọi quy mô doanh nghiệp',
         from: 'Khởi điểm từ',
         currency: 'VNĐ',
-        contact: 'Yêu Cầu Báo Giá'
+        contact: 'Tìm hiểu thêm về sản phẩm'
       },
       contact: {
         title: 'Kết Nối Hệ Thống',
@@ -39,6 +44,11 @@ export const content = {
       }
     },
     en: {
+      nav: {
+        home: 'Home',
+        about: 'About',
+        contact: 'Contact'
+      },
       hero: {
         title1: 'AI Velocity',
         title2: 'Developer Precision',
@@ -53,17 +63,17 @@ export const content = {
       },
       comparison: {
         title: 'Performance Analysis',
-        subtitle: 'Core capability assessment: Vibe Code Studio vs Standard platforms',
+        subtitle: 'Core capability assessment: Us vs Standard platforms',
         feature: 'Comparative criteria',
         vibeStudio: 'Us',
-        standardWix: 'Standard Wix'
+        standardWix: 'Standard platforms'
       },
       pricing: {
         title: 'Deployment Plans',
         subtitle: 'Optimized configurations for all business scales',
         from: 'Starting at',
         currency: 'VND',
-        contact: 'Request Quote'
+        contact: 'Learn More About The Product'
       },
       contact: {
         title: 'System Connection',
@@ -78,14 +88,19 @@ export const content = {
 
 export async function getInfo() {
   if (!WC_URL) {
-    console.error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables.');
-    return [];
+    throw new Error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables. Không thể fetch thông tin chung.');
   }
 
-  const response = await fetch(
-    `${WC_URL}/wp-json/wp/v2/thong-tin-chung?_embed=true&v=${Date.now()}`,
-    { cache: 'no-store' }
-  );
+  try {
+    const response = await fetch(
+      `${WC_URL}/wp-json/wp/v2/thong-tin-chung?_embed=true&v=${Date.now()}`,
+      { cache: 'no-store' }
+    );
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`❌ LỖI fetch thông tin chung từ CMS: ${response.status} ${response.statusText} - ${errorText}`);
+    }
   
   const raw_data = await response.json();
 
@@ -117,4 +132,8 @@ export async function getInfo() {
       order: item.acf.order || 0,
     };
   }));
+  } catch (error) {
+    console.error(`❌ LỖI nghiêm trọng khi fetch thông tin chung từ CMS:`, error);
+    throw error; // Re-throw to fail the build
+  }
 }

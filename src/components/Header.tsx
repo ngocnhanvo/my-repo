@@ -21,8 +21,8 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
     vi: {
       nav: {
         home: 'Trang Chủ',
-        process: 'Quy Trình',
-        comparison: 'So Sánh',
+        about: 'Giới Thiệu',
+        products: 'Sản Phẩm',
         pricing: 'Bảng Giá',
         contact: 'Liên Hệ'
       }
@@ -30,8 +30,8 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
     en: {
       nav: {
         home: 'Home',
-        process: 'Process',
-        comparison: 'Comparison',
+        about: 'About',
+        products: 'Products',
         pricing: 'Pricing',
         contact: 'Contact'
       }
@@ -49,8 +49,8 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
 
   const navItems = [
     { label: t.nav.home, href: '#hero' },
-    { label: t.nav.process, href: '#process' },
-    { label: t.nav.comparison, href: '#comparison' },
+    { label: t.nav.about, href: '/about' },
+    { label: t.nav.products, href: '/products' },
     { label: t.nav.pricing, href: '#pricing' },
     { label: t.nav.contact, href: '/contact' } // Thay đổi để dẫn đến trang /contact
   ];

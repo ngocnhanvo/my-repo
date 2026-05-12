@@ -8,6 +8,8 @@ import { getCompre } from '../lib/wordpress/sosanh';
 import { getInfo } from '../lib/wordpress/trangchu';
 import { getPrivacyPage } from '../lib/wordpress/chinhsachbaomat';
 import { getTermsPage } from '../lib/wordpress/chinhsachdichvu';
+import { getAboutPage } from '../lib/wordpress/gioithieu';
+import { getProducts } from '../lib/wordpress/sanpham';
 
 let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
 export async function getStaticPaths() {
@@ -17,7 +19,8 @@ export async function getStaticPaths() {
   const data_info = await getInfo();
   const data_privacy = await getPrivacyPage();
   const data_terms = await getTermsPage();
-
+  const data_about_me = await getAboutPage();
+  const data_products = await getProducts();
   const commonProps = {
     type: 'home',
     data_process_steps,
@@ -25,6 +28,8 @@ export async function getStaticPaths() {
     data_info,
     data_privacy,
     data_terms,
+    data_about_me,
+    data_products,
     title: `${data_info[0]?.['tencongty'] || 'Vibe Code Studio'} – Tốc Độ AI, Chất Lượng Developer`,
     description: 'Xây dựng website chuyên nghiệp với sức mạnh AI và tay nghề chuyên gia. Hệ thống rèn đúc kỹ thuật số kết hợp AI tiên tiến với kinh nghiệm phát triển web chuyên sâu.',
     ogImage: `${WC_URL}/wp-content/uploads/og-image.jpg`,
@@ -71,7 +76,7 @@ export async function getStaticPaths() {
   ];
 }
 
-const { type, title, description, ogImage, data_process_steps, data_compre, data_info, data_privacy, data_terms, baseUrl } = Astro.props;
+const { type, title, description, ogImage, data_process_steps, data_compre, data_info, data_privacy, data_terms, data_about_me, data_products, baseUrl } = Astro.props;
 const { slug } = Astro.params;
 const lang = slug?.split('/')[0] === 'en' ? 'en' : 'vi';
 const locale = lang === 'en' ? 'en_US' : 'vi_VN';
@@ -145,6 +150,8 @@ const currentPageUrl = slug ? `${WC_URL_CLIENT}/${slug}` : WC_URL_CLIENT;
           data_info={data_info}
           data_privacy={data_privacy}
           data_terms={data_terms}
+          data_about_me={data_about_me}
+          data_products={data_products}
           WC_URL={baseUrl}
         />
       )}

@@ -5,6 +5,9 @@ import HomePage from '@/components/pages/HomePage';
 import PrivacyPage from '@/components/pages/PrivacyPage';
 import TermsPage from '@/components/pages/TermsPage';
 import ContactPage from '@/components/pages/ContactPage';
+import AboutPage from '@/components/pages/AboutPage';
+import ProductListPage from '@/components/pages/ProductListPage';
+import ProductDetailPage from '@/components/pages/ProductDetailPage';
 import React, { useState, useEffect } from 'react'; // Import React, useState, useEffect
 import { WPProcessStep, WPComparison, WPInfo } from '@/entities';
 
@@ -15,6 +18,8 @@ interface AppRouterProps {
   WC_URL: string;
   data_privacy?: any; // Thêm thuộc tính data_privacy vào interface
   data_terms?: any;
+  data_about_me?: any;
+  data_products?: any[];
 }
 
 // Layout component that includes ScrollToTop
@@ -70,6 +75,18 @@ const getRouterConfig = (props: AppRouterProps) => ([
       {
         path: ":lang/contact",
         element: <ContactPage {...props} />,
+      },
+      {
+        path: ":lang/about",
+        element: <AboutPage {...props} />,
+      },
+      {
+        path: ":lang/products",
+        element: <ProductListPage {...props} />,
+      },
+      {
+        path: ":lang/products/:slug",
+        element: <ProductDetailPage {...props} />,
       },
       {
         path: ":lang/*", // Catch-all for other paths with language prefix
