@@ -1,3 +1,4 @@
+import { processAndStoreImage } from './imageProcessor';
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
 export async function getProducts() {
@@ -60,7 +61,17 @@ export async function getProducts() {
       }
     });
 
-    return Object.values(unifiedProducts);
+    // Xử lý lưu ảnh static cho tất cả sản phẩm đã gom nhóm
+    return await Promise.all(Object.values(unifiedProducts).map(async (p: any) => {
+      if (p.image) {
+        p.image = await processAndStoreImage({
+          imageUrl: p.image,
+          wcUrl: WC_URL,
+          publicDirBase: 'images/products', // Lưu vào thư mục riêng cho sản phẩm
+        });
+      }
+      return p;
+    }));
 
   } catch (error) {
     console.error(`❌ LỖI nghiêm trọng khi fetch sản phẩm:`, error);
