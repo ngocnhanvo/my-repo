@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ request }) => { // Keep POST export
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Contact Form <onboarding@resend.dev>',
+        from: 'Contact Form <hello@kieuynhu.id.vn>',
         to: recipient,
         cc: email ? [email] : undefined,
         subject: `[${companyName || 'Vibe Code'}] Yêu cầu từ khách hàng: ${name}`,
@@ -28,7 +28,7 @@ export const POST: APIRoute = async ({ request }) => { // Keep POST export
           <p><strong>Số điện thoại:</strong> ${phone}</p>
           ${email ? `<p><strong>Email khách hàng:</strong> ${email}</p>` : ''}
           <p><strong>Nội dung:</strong></p>
-          <p>${message}</p>
+          <p>${message.replace(/\n/g, '<br />')}</p>
         `,
       }),
     });

@@ -5,6 +5,7 @@ export const content = {
     vi: {
       nav: {
         home: 'Trang Chủ',
+        products: 'Sản Phẩm',
         about: 'Giới Thiệu',
         contact: 'Liên Hệ'
       },
@@ -29,10 +30,10 @@ export const content = {
       },
       pricing: {
         title: 'Gói Triển Khai',
-        subtitle: 'Cấu hình tối ưu cho mọi quy mô doanh nghiệp',
+        subtitle: 'Đa dạng cho nhiều quy mô doanh nghiệp',
         from: 'Khởi điểm từ',
         currency: 'VNĐ',
-        contact: 'Tìm hiểu thêm về sản phẩm'
+        contact: 'Tìm hiểu thêm'
       },
       contact: {
         title: 'Kết Nối Hệ Thống',
@@ -46,6 +47,7 @@ export const content = {
     en: {
       nav: {
         home: 'Home',
+        products: 'Products',
         about: 'About',
         contact: 'Contact'
       },
@@ -70,10 +72,10 @@ export const content = {
       },
       pricing: {
         title: 'Deployment Plans',
-        subtitle: 'Optimized configurations for all business scales',
+        subtitle: 'Versatile solutions for any business size',
         from: 'Starting at',
         currency: 'VND',
-        contact: 'Learn More About The Product'
+        contact: 'Learn More'
       },
       contact: {
         title: 'System Connection',

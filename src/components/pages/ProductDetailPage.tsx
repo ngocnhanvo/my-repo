@@ -59,11 +59,11 @@ export default function ProductDetailPage({ data_info, data_products = [] }: Pro
                 </div>
               )}
 
-              {product.image && (
+              {/* {product.image && (
                 <div className="aspect-video w-full overflow-hidden border border-white/10 glass-panel">
                   <img src={product.image} alt={title} className="w-full h-full object-cover" />
                 </div>
-              )}
+              )} */}
             </header>
 
             <div className="prose prose-invert max-w-none text-foreground/70 leading-relaxed article-content"

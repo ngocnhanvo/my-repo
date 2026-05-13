@@ -74,7 +74,9 @@ export default function ContactPage({ data_info }: ContactPageProps) {
       sending: 'Đang truyền dữ liệu...',
       success: 'Đã gửi thành công! Chúng tôi sẽ liên hệ lại sớm.',
       error: 'Có lỗi xảy ra. Vui lòng thử lại sau.',
-      invalidPhone: 'Số điện thoại không hợp lệ (Ví dụ: 0912345678 hoặc +84912345678)'
+      invalidPhone: 'Số điện thoại không hợp lệ (Ví dụ: 0912 345 678)',
+      namePlaceholder: 'Ví dụ: Nguyễn Văn A',
+      messagePlaceholder: 'Ví dụ: Tôi cần tư vấn về giải pháp thiết kế website doanh nghiệp...'
     },
     en: {
       title: 'Contact Us',
@@ -87,7 +89,9 @@ export default function ContactPage({ data_info }: ContactPageProps) {
       sending: 'Transmitting...',
       success: 'Sent successfully! We will contact you soon.',
       error: 'An error occurred. Please try again later.',
-      invalidPhone: 'Invalid phone number (Example: 0912345678 or +84912345678)'
+      invalidPhone: 'Invalid phone number (Example: 0912 345 678)',
+      namePlaceholder: 'e.g. John Doe',
+      messagePlaceholder: 'e.g. I would like to consult about business website solutions...'
     }
   }[language];
 
@@ -152,6 +156,7 @@ export default function ContactPage({ data_info }: ContactPageProps) {
                     required
                     type="text"
                     className="w-full bg-background border border-white/10 p-4 focus:border-primary outline-none transition-colors"
+                    placeholder={t.namePlaceholder}
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
@@ -165,10 +170,20 @@ export default function ContactPage({ data_info }: ContactPageProps) {
                     type="tel"
                     className="w-full bg-background border border-white/10 p-4 focus:border-primary outline-none transition-colors"
                     value={formData.phone}
+                    placeholder="09xx xxx xxx"
                     onChange={(e) => {
-                      // Chỉ cho phép nhập số và dấu + ở đầu
-                      const val = e.target.value.replace(/[^0-9+]/g, '');
-                      setFormData({...formData, phone: val});
+                      // Chỉ lấy các chữ số
+                      const rawVal = e.target.value.replace(/\D/g, '').substring(0, 10);
+                      
+                      // Áp dụng mặt nạ: 0xxx xxx xxx
+                      let maskedVal = rawVal;
+                      if (rawVal.length > 7) {
+                        maskedVal = `${rawVal.slice(0, 4)} ${rawVal.slice(4, 7)} ${rawVal.slice(7)}`;
+                      } else if (rawVal.length > 4) {
+                        maskedVal = `${rawVal.slice(0, 4)} ${rawVal.slice(4)}`;
+                      }
+                      
+                      setFormData({...formData, phone: maskedVal});
                     }}
                   />
                 </div>
@@ -195,6 +210,7 @@ export default function ContactPage({ data_info }: ContactPageProps) {
                   required
                   rows={5}
                   className="w-full bg-background border border-white/10 p-4 focus:border-primary outline-none transition-colors resize-none"
+                  placeholder={t.messagePlaceholder}
                   value={formData.message}
                   onChange={(e) => setFormData({...formData, message: e.target.value})}
                 />

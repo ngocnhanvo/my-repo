@@ -1,0 +1,50 @@
+---
+import { content } from '../lib/wordpress/trangchu';
+
+// Mặc định lấy tiếng Việt, bạn có thể truyền props 'lang' vào nếu làm đa ngôn ngữ
+const { lang = 'vi' } = Astro.props;
+const nav = content[lang].nav;
+
+// 1. Lấy đường dẫn hiện tại từ URL của trang
+const { pathname } = Astro.url;
+
+// 2. Hàm kiểm tra xem menu item có đang active không
+const isActive = (href: string) => {
+  // Nếu là trang chủ, so sánh khớp tuyệt đối
+  if (href === '/') return pathname === '/';
+  // Với các trang khác, dùng startsWith để highlight luôn khi vào các trang con
+  return pathname.startsWith(href);
+};
+
+// Danh sách menu khớp với các route trong project của bạn
+const menuItems = [
+  { label: nav.home, href: '/' },
+  { label: nav.products, href: '/products' },
+  { label: nav.about, href: '/gioi-thieu' },
+  { label: nav.contact, href: '/lien-he' },
+];
+---
+
+<header class="bg-white sticky top-0 z-50 border-b border-gray-100 shadow-sm">
+  <div class="container mx-auto px-4">
+    <nav class="flex items-center justify-center space-x-10 h-20">
+      {menuItems.map((item) => (
+        <a 
+          href={item.href} 
+          class={`relative h-full flex items-center text-[15px] font-semibold transition-all duration-300 ${
+            isActive(item.href) 
+              ? "text-blue-600" // Màu khi đang ở trang đó
+              : "text-gray-500 hover:text-blue-400" // Màu bình thường
+          }`}
+        >
+          {item.label}
+          
+          {/* Dấu hiệu gạch chân khi active */}
+          {isActive(item.href) && (
+            <span class="absolute bottom-0 left-0 w-full h-1 bg-blue-600 rounded-t-full"></span>
+          )}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>

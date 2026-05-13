@@ -23,7 +23,6 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
         home: 'Trang Chủ',
         about: 'Giới Thiệu',
         products: 'Sản Phẩm',
-        pricing: 'Bảng Giá',
         contact: 'Liên Hệ'
       }
     },
@@ -32,13 +31,22 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
         home: 'Home',
         about: 'About',
         products: 'Products',
-        pricing: 'Pricing',
         contact: 'Contact'
       }
     }
   };
 
   const t = content[language];
+
+  // Hàm kiểm tra trạng thái active của menu
+  const isActive = (href: string) => {
+    const isHomePage = location.pathname === `/${language}` || location.pathname === `/${language}/`;
+    if (href.startsWith('#')) {
+      return isHomePage; // Các link neo (#hero) chỉ active khi ở trang chủ
+    }
+    // Với các trang khác, kiểm tra xem pathname có bắt đầu bằng đường dẫn menu không (hỗ trợ trang con /products/slug)
+    return location.pathname.startsWith(`/${language}${href}`);
+  };
 
   // Function to generate language-prefixed URLs
   const getLocalizedHref = (href: string) => {
@@ -51,7 +59,6 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
     { label: t.nav.home, href: '#hero' },
     { label: t.nav.about, href: '/about' },
     { label: t.nav.products, href: '/products' },
-    { label: t.nav.pricing, href: '#pricing' },
     { label: t.nav.contact, href: '/contact' } // Thay đổi để dẫn đến trang /contact
   ];
 
@@ -111,9 +118,18 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 onClick={() => handleNavClick(item.href)} // For anchor links, we still want to scroll within the current page
-                className="text-foreground/80 hover:text-primary transition-colors font-medium"
+                className={`relative py-2 transition-colors font-medium ${
+                  isActive(item.href) ? "text-primary" : "text-foreground/80 hover:text-primary"
+                }`}
               >
                 {item.label}
+                {/* Gạch chân dưới menu khi active */}
+                {isActive(item.href) && (
+                  <motion.div
+                    layoutId="activeUnderline"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
+                  />
+                )}
               </motion.button>
             ))}
           </nav>
@@ -171,7 +187,9 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
                 <button
                   key={item.href}
                   onClick={() => handleNavClick(item.href)}
-                  className="text-foreground/80 hover:text-primary transition-colors font-medium text-left py-2"
+                  className={`transition-colors font-medium text-left py-2 border-l-4 pl-3 ${
+                    isActive(item.href) ? "text-primary border-primary bg-primary/5" : "text-foreground/80 border-transparent"
+                  }`}
                 >
                   {item.label}
                 </button>
