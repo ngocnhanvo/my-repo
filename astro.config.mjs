@@ -50,37 +50,42 @@ export default defineConfig({
     }),
     // Hook di chuyển ảnh từ public/images/ vào dist/images/ sau khi build xong
     {
-      name: "move-wp-images",
+      name: "move-generated-assets",
       hooks: {
         "astro:build:done": async ({ dir }) => {
           if (!isBuild) return;
 
-          const { existsSync, mkdirSync, cpSync, rmSync } = await import('node:fs');
+          const { existsSync, cpSync, rmSync } = await import('node:fs');
           const { fileURLToPath } = await import('node:url');
           const path = await import('node:path');
 
-          const srcDir = path.join(process.cwd(), 'public/images');
-          const destDir = fileURLToPath(new URL('images/', dir));
-
-          if (!existsSync(srcDir)) {
-            console.log('⚠️ public/images/ không tồn tại, bỏ qua.');
-            return;
-          }
-
           try {
-            // 1. Copy toàn bộ nội dung (bao gồm cả folder con như 'info')
-            // force: true giúp ghi đè nếu đã tồn tại
-            // recursive: true giúp copy cả thư mục con
-            cpSync(srcDir, destDir, { recursive: true, force: true });
-            console.log('✅ Đã copy toàn bộ images sang dist/');
+            // 1. Di chuyển thư mục images
+            const srcDir = path.join(process.cwd(), 'public/images');
+            const destDir = fileURLToPath(new URL('images/', dir));
 
-            // 2. Xóa sạch thư mục public/images sau khi hoàn tất
-            // recursive: true xóa cả nội dung bên trong
-            rmSync(srcDir, { recursive: true, force: true });
-            console.log('🧹 Đã dọn sạch public/images/');
+            if (existsSync(srcDir)) {
+              cpSync(srcDir, destDir, { recursive: true, force: true });
+              console.log('✅ Đã copy toàn bộ images sang dist/');
+              rmSync(srcDir, { recursive: true, force: true });
+              console.log('🧹 Đã dọn sạch public/images/');
+            }
+
+            // 2. Di chuyển robots.txt và sitemap.xml
+            const filesToMove = ['robots.txt', 'sitemap.xml'];
+            filesToMove.forEach(file => {
+              const srcFile = path.join(process.cwd(), 'public', file);
+              const destFile = fileURLToPath(new URL(file, dir));
+              if (existsSync(srcFile)) {
+                cpSync(srcFile, destFile, { force: true });
+                console.log(`✅ Đã copy ${file} sang dist/`);
+                rmSync(srcFile, { force: true });
+                console.log(`🧹 Đã dọn sạch public/${file}`);
+              }
+            });
             
           } catch (err) {
-            console.error('❌ Lỗi khi xử lý images:', err instanceof Error ? err.message : String(err));
+            console.error('❌ Lỗi khi xử lý file sau build:', err instanceof Error ? err.message : String(err));
           }
         }
       }
