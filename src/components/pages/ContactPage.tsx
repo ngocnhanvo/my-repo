@@ -113,6 +113,7 @@ export default function ContactPage({ data_info }: ContactPageProps) {
         body: JSON.stringify({ 
           ...formData, 
           toEmail: infoData.email,
+          domain: infoData.domain, // Gửi domain để API có thể sử dụng trong email người gửi
           companyName: infoData[`${prefixWP}tencongty`]
         }),
       });

@@ -105,7 +105,9 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
               )}
             </div>
             <div>
-              <h1 className="font-heading text-xl font-bold text-foreground">{infoData[`${prefixWP}tencongty`]}</h1>
+              <h1 className="font-heading text-xl font-bold text-foreground max-[420px]:text-[60%]">
+                {infoData[`${prefixWP}tencongty`]}
+              </h1>
             </div>
           </motion.div>
 

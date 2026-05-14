@@ -5,11 +5,19 @@ export const prerender = false;
 export const POST: APIRoute = async ({ request }) => { // Keep POST export
   try {
     const body = await request.json();
-    const { name, phone, email, message, toEmail, companyName } = body;
+    const { name, phone, email, message, toEmail, companyName, domain } = body;
 
     // Bạn cần cài đặt biến môi trường RESEND_API_KEY trên Cloudflare Dashboard
     const RESEND_API_KEY = import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY;
+    const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
+    const WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
     const recipient = toEmail || "contact@vibecodestudio.com"; // Ưu tiên email từ client, fallback nếu cần
+    const fromEmail = `Trợ lý NVN<troly@${domain}>`; // Định dạng email người gửi
+
+    if (!RESEND_API_KEY) {
+      console.error('❌ LỖI: Biến RESEND_API_KEY chưa được cấu hình trong Environment Variables. Không thể gửi email.');
+      return new Response(JSON.stringify({ error: 'Email service not configured' }), { status: 500 });
+    }
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -18,7 +26,7 @@ export const POST: APIRoute = async ({ request }) => { // Keep POST export
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Contact Form <hello@kieuynhu.id.vn>',
+        from: fromEmail, // Sử dụng email người gửi đã định dạng
         to: recipient,
         cc: email ? [email] : undefined,
         subject: `[${companyName || 'Vibe Code'}] Yêu cầu từ khách hàng: ${name}`,
@@ -38,7 +46,7 @@ export const POST: APIRoute = async ({ request }) => { // Keep POST export
     } else {
       const errorData = await res.json(); // Đọc phản hồi lỗi từ Resend
       console.error('Resend API Error:', res.status, errorData); // Log lỗi chi tiết
-      return new Response(JSON.stringify({ error: 'Failed to send', details: errorData }), { status: 500 });
+      return new Response(JSON.stringify({ error: 'Failed to send', details: errorData + fromEmail }), { status: 500 });
     }
   } catch (error) {
     console.error('API Contact Catch Error:', error); // Log lỗi trong khối catch

@@ -61,6 +61,8 @@ export interface WPInfo {
   en_diachi?: string;
   sodienthoai?: string;
   email?: string;
+  domain?: string;
   logo?: string;
   favicon?: string;
+  image?: string;
 }

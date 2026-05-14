@@ -135,6 +135,7 @@ export async function getInfo() {
       en_diachi: item.acf.en_diachi || '',
       sodienthoai: item.acf.sodienthoai || '',
       email: item.acf.email || '',
+      domain: item.acf.domain || '',
       logo: processedLogoUrl,
       favicon: processedFaviconUrl,
       image: processedImageUrl,

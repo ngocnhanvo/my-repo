@@ -359,7 +359,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
                                   src={step.image}
                                   alt={step[`${prefixWP}tieudechinh`] || ''}
                                   width={600}
-                                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 scale-105 group-hover:scale-100"
+                                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 [@media(hover:none)and(pointer:coarse)]:grayscale-0 transition-all duration-500 scale-105 group-hover:scale-100"
                                 />
                               </div>
                             </div>
