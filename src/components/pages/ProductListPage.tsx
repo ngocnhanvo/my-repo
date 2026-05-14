@@ -5,7 +5,7 @@ import { WPInfo } from '@/entities';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Package } from 'lucide-react';
-import { resolvePlaceholders, formatCurrency } from '@/lib/stringUtils';
+import { resolvePlaceholders, formatCurrency, getWebpPath } from '@/lib/stringUtils';
 
 interface ProductListPageProps {
   data_info: WPInfo[];
@@ -58,11 +58,14 @@ export default function ProductListPage({ data_info, data_products = [] }: Produ
                 >
                   <div className="aspect-video relative overflow-hidden bg-white/5">
                     {product.image ? (
-                      <img 
-                        src={product.image} 
-                        alt={title} 
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
+                      <picture>
+                        <source srcSet={getWebpPath(product.image)} type="image/webp" />
+                        <img 
+                          src={product.image} 
+                          alt={title} 
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      </picture>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Package className="w-12 h-12 text-primary/20" />

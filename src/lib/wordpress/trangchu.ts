@@ -1,4 +1,5 @@
 import { processAndStoreImage } from './imageProcessor'; // Import the new utility function
+// import { generateAndSaveSitemap } from './sitemap'; // Removed as sitemap is generated in Astro
 
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL; // Keep WC_URL
 export const content = {
@@ -142,6 +143,7 @@ export async function getInfo() {
       order: item.acf.order || 0
     };
   }));
+
   } catch (error) {
     console.error(`❌ LỖI nghiêm trọng khi fetch thông tin chung từ CMS:`, error);
     throw error; // Re-throw to fail the build

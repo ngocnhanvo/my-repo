@@ -17,32 +17,45 @@ export async function processAndStoreImage({
     // Import động các thư viện Node.js bên trong hàm
     const { writeFileSync, mkdirSync, existsSync } = await import('node:fs');
     const path = await import('node:path');
-
+    const sharp = (await import('sharp')).default;
     let absoluteImageUrl = imageUrl;
     if (absoluteImageUrl.startsWith('/') && wcUrl) {
       absoluteImageUrl = `${wcUrl.replace(/\/$/, '')}${absoluteImageUrl}`;
     }
 
-    const filename = absoluteImageUrl.split('/').pop()?.split('?')[0];
-    if (!filename) return absoluteImageUrl;
+    const originalFilename = absoluteImageUrl.split('/').pop()?.split('?')[0];
+    if (!originalFilename) return absoluteImageUrl;
+
+    const ext = path.extname(originalFilename);
+    const nameWithoutExt = path.basename(originalFilename, ext);
+    const webpFilename = `${nameWithoutExt}.webp`;
 
     const publicDir = path.resolve('public', publicDirBase);
-    const localPath = path.join(publicDir, filename);
-    const publicUrl = `/${publicDirBase}/${filename}`;
-
+    const originalLocalPath = path.join(publicDir, originalFilename);
+    const webpLocalPath = path.join(publicDir, webpFilename);
+    const publicUrl = `/${publicDirBase}/${originalFilename}`;
     try {
       if (!existsSync(publicDir)) {
         mkdirSync(publicDir, { recursive: true });
       }
 
-      if (existsSync(localPath)) {
-        return publicUrl;
-      }
-
       const res = await fetch(absoluteImageUrl);
       if (res.ok) {
         const buffer = await res.arrayBuffer();
-        writeFileSync(localPath, Buffer.from(buffer));
+        const nodeBuffer = Buffer.from(buffer);
+
+        // Lưu ảnh gốc
+        if (!existsSync(originalLocalPath)) {
+          writeFileSync(originalLocalPath, nodeBuffer);
+        }
+
+        // Tạo và lưu ảnh WebP
+        if (!existsSync(webpLocalPath)) {
+          await sharp(nodeBuffer)
+            .webp({ quality: 80 })
+            .toFile(webpLocalPath);
+        }
+
         return publicUrl;
       }
     } catch (err) {

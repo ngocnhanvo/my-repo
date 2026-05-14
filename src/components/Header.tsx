@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, Globe } from 'lucide-react';
 import { WPInfo } from '@/entities';
 import { useLocation, useNavigate } from 'react-router-dom'; // Import useLocation, useNavigate
+import { getWebpPath } from '@/lib/stringUtils';
 
 interface HeaderProps {
   language: 'vi' | 'en';
@@ -95,11 +96,14 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
           >
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center overflow-hidden">
               {infoData.logo ? (
+                <picture>
+                <source srcSet={getWebpPath(infoData.logo)} type="image/webp" />
                 <img 
                   src={infoData.logo} 
                   alt={infoData[`${prefixWP}tencongty`] || 'Logo'} 
                   className="w-full h-full object-contain p-1.5"
                 />
+                </picture>
               ) : (
                 <span className="text-primary-foreground font-bold text-xl">V</span>
               )}

@@ -1,4 +1,5 @@
 import { WPInfo } from '@/entities/wordpress';
+import { getWebpPath } from '@/lib/stringUtils';
 import { motion } from 'framer-motion';
 import { Code, Zap, Globe } from 'lucide-react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
@@ -79,11 +80,14 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
                 {infoData.logo ? (
+                  <picture>
+                  <source srcSet={getWebpPath(infoData.logo)} type="image/webp" />
                   <img 
                     src={infoData.logo} 
                     alt={infoData[`${prefixWP}tencongty`] || 'Logo'} 
                     className="w-full h-full object-contain p-1.5"
                   />
+                  </picture>
                 ) : (
                   <span className="text-primary-foreground font-bold text-xl">V</span>
                 )}

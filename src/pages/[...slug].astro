@@ -10,6 +10,7 @@ import { getPrivacyPage } from '../lib/wordpress/chinhsachbaomat';
 import { getTermsPage } from '../lib/wordpress/chinhsachdichvu';
 import { getAboutPage } from '../lib/wordpress/gioithieu';
 import { getProducts } from '../lib/wordpress/sanpham';
+import { generateAndSaveSitemap } from '../lib/wordpress/sitemap';
 import { stripHtmlAndUnescape } from '../lib/stringUtils';
 
 let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
@@ -138,6 +139,9 @@ export async function getStaticPaths() {
     });
   });
   
+  // Gọi hàm tạo sitemap sau khi tất cả các trang đã được thu thập
+  await generateAndSaveSitemap(pages, data_info[0]);
+
   // 2. Map mảng pages sang định dạng của Astro
   return pages.map(page => ({
     params: { slug: page.slug },

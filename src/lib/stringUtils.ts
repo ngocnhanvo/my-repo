@@ -12,6 +12,11 @@ export const escapeHtml = (unsafe: string): string => {
     .replace(/'/g, "&#039;");
 };
 
+export const getWebpPath = (url: string) => {
+  if (!url) return "";
+  return url.replace(/\.[^/.]+$/, "") + ".webp";
+};
+
 export const stripHtmlAndUnescape = (html: string): string => {
   if (!html) return '';
   // 1. Loại bỏ các thẻ HTML bằng Regex

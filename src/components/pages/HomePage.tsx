@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import { content } from '@/lib/wordpress/trangchu';
 import { WPProcessStep, WPComparison, WPInfo } from '@/entities';
 import { useOutletContext, useLocation, useNavigate } from 'react-router-dom'; // Import useOutletContext, useLocation, useNavigate
+import { getWebpPath } from '@/lib/stringUtils';
 
 // 1. Định nghĩa kiểu dữ liệu cho Props
 interface HomePageProps {
@@ -74,6 +75,9 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
       }
     }
   }, [isLoadingSteps, isLoadingComparison, location.state, location.hash]);
+
+  // Helper function to get WebP path from original image path
+
 
   const loadData = async () => {
     try {
@@ -355,12 +359,15 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
                             <div className="xl:w-1/3 shrink-0">
                               <div className="relative aspect-video xl:aspect-square overflow-hidden border border-white/10 group-hover:border-primary/30 transition-colors">
                                 <div className="absolute inset-0 bg-primary/20 mix-blend-overlay z-10 group-hover:opacity-0 transition-opacity duration-500" />
-                                <img
-                                  src={step.image}
-                                  alt={step[`${prefixWP}tieudechinh`] || ''}
-                                  width={600}
-                                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 [@media(hover:none)and(pointer:coarse)]:grayscale-0 transition-all duration-500 scale-105 group-hover:scale-100"
-                                />
+                                <picture>
+                                  <source srcSet={getWebpPath(step.image)} type="image/webp" />
+                                  <img
+                                    src={step.image}
+                                    alt={step[`${prefixWP}tieudechinh`] || ''}
+                                    width={600}
+                                    className="w-full h-full object-cover transition-all duration-500 scale-105 group-hover:scale-100 grayscale-0 [@media(hover:hover)]:grayscale [@media(hover:hover)]:group-hover:grayscale-0"
+                                  />
+                                </picture>
                               </div>
                             </div>
                           )}
