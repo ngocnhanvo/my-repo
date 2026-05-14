@@ -10,6 +10,7 @@ import ProductListPage from '@/components/pages/ProductListPage';
 import ProductDetailPage from '@/components/pages/ProductDetailPage';
 import React, { useState, useEffect } from 'react'; // Import React, useState, useEffect
 import { WPProcessStep, WPComparison, WPInfo } from '@/entities';
+import { HelmetProvider } from 'react-helmet-async';
 
 interface AppRouterProps {
   data_process_steps: WPProcessStep[];
@@ -117,8 +118,10 @@ export default function AppRouter(props: AppRouterProps) {
   }
 
   return (
+    <HelmetProvider>
     <MemberProvider>
       <RouterProvider router={router} />
     </MemberProvider>
+    </HelmetProvider>
   );
 }

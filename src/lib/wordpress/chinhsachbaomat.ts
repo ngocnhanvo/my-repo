@@ -1,6 +1,8 @@
+import { WPInfo } from '@/entities/wordpress';
+import { resolvePlaceholders } from '../stringUtils';
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
-export async function getPrivacyPage() { // Renamed function to match file name
+export async function getPrivacyPage(infoData: WPInfo) { // Renamed function to match file name
   if (!WC_URL) {
     console.error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables.');
     return { title: '', content: '', en_title: '', en_content: '' };
@@ -19,11 +21,11 @@ export async function getPrivacyPage() { // Renamed function to match file name
 
     return {
       // Nội dung tiếng Việt
-      title: viPage?.title?.rendered || '',
-      content: viPage?.content?.rendered || '',
+      title: resolvePlaceholders(viPage?.title?.rendered || '', infoData),
+      content: resolvePlaceholders(viPage?.content?.rendered || '', infoData),
       // Nội dung tiếng Anh (từ trang riêng)
-      en_title: enPage?.title?.rendered || '',
-      en_content: enPage?.content?.rendered || '',
+      en_title: resolvePlaceholders(enPage?.title?.rendered || '', infoData),
+      en_content: resolvePlaceholders(enPage?.content?.rendered || '', infoData),
     };
   } catch (error) {
     console.error(`❌ LỖI fetch Privacy Policy:`, error);

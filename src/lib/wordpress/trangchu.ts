@@ -107,8 +107,9 @@ export async function getInfo() {
   const raw_data = await response.json();
 
   return await Promise.all(raw_data.map(async (item: any) => {
-    const logoUrl = item.acf.logo.url || '';
-    const faviconUrl = item.acf.favicon.url || '';
+    const logoUrl = item.acf.logo?.url || '';
+    const faviconUrl = item.acf.favicon?.url || '';
+    const imageUrl = item.acf.image?.url || '';
 
     const processedLogoUrl = await processAndStoreImage({
       imageUrl: logoUrl,
@@ -117,6 +118,11 @@ export async function getInfo() {
     });
     const processedFaviconUrl = await processAndStoreImage({
       imageUrl: faviconUrl,
+      wcUrl: WC_URL,
+      publicDirBase: 'images/info', // Lưu ảnh logo/favicon vào thư mục riêng
+    });
+    const processedImageUrl = await processAndStoreImage({
+      imageUrl: imageUrl,
       wcUrl: WC_URL,
       publicDirBase: 'images/info', // Lưu ảnh logo/favicon vào thư mục riêng
     });
@@ -131,7 +137,8 @@ export async function getInfo() {
       email: item.acf.email || '',
       logo: processedLogoUrl,
       favicon: processedFaviconUrl,
-      order: item.acf.order || 0,
+      image: processedImageUrl,
+      order: item.acf.order || 0
     };
   }));
   } catch (error) {

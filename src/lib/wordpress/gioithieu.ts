@@ -1,6 +1,8 @@
+import { resolvePlaceholders } from '../stringUtils';
+import { WPInfo } from '@/entities/wordpress';
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
-export async function getAboutPage() {
+export async function getAboutPage(infoData: WPInfo) { // Keep getAboutPage export
   if (!WC_URL) {
     throw new Error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables. Không thể fetch About Page.');
   }
@@ -26,10 +28,10 @@ export async function getAboutPage() {
 
     return {
       // Trả về cấu trúc phẳng y hệt trang chính sách
-      title: viPage?.title?.rendered || '',
-      content: viPage?.content?.rendered || '',
-      en_title: enPage?.title?.rendered || '',
-      en_content: enPage?.content?.rendered || '',
+      title: resolvePlaceholders(viPage?.title?.rendered || '', infoData),
+      content: resolvePlaceholders(viPage?.content?.rendered || '', infoData),
+      en_title: resolvePlaceholders(enPage?.title?.rendered || '', infoData),
+      en_content: resolvePlaceholders(enPage?.content?.rendered || '', infoData),
     };
   } catch (error) {
     console.error(`❌ LỖI nghiêm trọng khi fetch About Page từ CMS:`, error);

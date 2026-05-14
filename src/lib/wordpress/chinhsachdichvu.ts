@@ -1,6 +1,8 @@
+import { WPInfo } from '@/entities/wordpress';
+import { resolvePlaceholders } from '../stringUtils';
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
-export async function getTermsPage() { // Keep getTermsPage export
+export async function getTermsPage(infoData: WPInfo) { // Keep getTermsPage export
   if (!WC_URL) {
     console.error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables.');
     return { title: '', content: '', en_title: '', en_content: '' };
@@ -18,10 +20,10 @@ export async function getTermsPage() { // Keep getTermsPage export
     const enPage = enPages.length > 0 ? enPages[0] : null;
 
     return {
-      title: viPage?.title?.rendered || 'Điều Khoản Dịch Vụ',
-      content: viPage?.content?.rendered || '',
-      en_title: enPage?.title?.rendered || 'Terms of Service',
-      en_content: enPage?.content?.rendered || '',
+      title: resolvePlaceholders(viPage?.title?.rendered || 'Điều Khoản Dịch Vụ', infoData),
+      content: resolvePlaceholders(viPage?.content?.rendered || '', infoData),
+      en_title: resolvePlaceholders(enPage?.title?.rendered || 'Terms of Service', infoData),
+      en_content: resolvePlaceholders(enPage?.content?.rendered || '', infoData),
     };
   } catch (error) {
     console.error(`❌ LỖI fetch Terms Page:`, error);
