@@ -20,13 +20,13 @@ const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
 // Fetch dữ liệu trực tiếp cho mỗi lần request (SSR)
 // Lưu ý: Truyền 'any' hoặc 'draft,publish' để lấy được bản nháp
-const data_process_steps = await getProcessSteps('any', true); // Đang ở chế độ preview
+const data_process_steps = await getProcessSteps(undefined, true); // Đang ở chế độ preview
 const data_compre = await getCompre();
 const data_info = await getInfo(true); // Đang ở chế độ preview
 const data_privacy = await getPrivacyPage(data_info[0] || {});
 const data_terms = await getTermsPage(data_info[0] || {});
 const data_about_me = await getAboutPage(data_info[0] || {});
-const data_products = await getProducts('any', true); // Đang ở chế độ preview
+const data_products = await getProducts(undefined, true); // Đang ở chế độ preview
 
   const companyName = data_info[0]?.['tencongty'] || 'Vibe Code Studio';
   
