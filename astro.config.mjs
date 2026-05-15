@@ -93,11 +93,11 @@ export default defineConfig({
   ],
   vite: {
     ssr: {
-      external: ['node:fs', 'node:path'],
+      external: ['node:buffer', 'node:fs', 'node:path'],
     },
     build: {
       rollupOptions: {
-        external: ['node:fs', 'node:path']
+        external: ['node:buffer','node:fs', 'node:path']
       }
     },
     plugins: [customErrorOverlayPlugin()],

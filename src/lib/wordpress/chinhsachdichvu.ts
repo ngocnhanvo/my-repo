@@ -10,7 +10,7 @@ export async function getTermsPage(infoData: WPInfo) { // Keep getTermsPage expo
 
   try {
     // Fetch trang điều khoản dịch vụ tiếng Việt
-    const viResponse = await fetch(`${WC_URL}/wp-json/wp/v2/pages?slug=terms-service&_embed=true`);
+    const viResponse = await fetch(`${WC_URL}/wp-json/wp/v2/pages?slug=terms-service&_embed=true&status=publish`);
     const viPages = viResponse.ok ? await viResponse.json() : [];
     const viPage = viPages.length > 0 ? viPages[0] : null;
 

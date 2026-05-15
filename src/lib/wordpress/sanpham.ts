@@ -1,7 +1,7 @@
 import { processAndStoreImage } from './imageProcessor';
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
-export async function getProducts() {
+export async function getProducts(status: string = 'publish') {
   if (!WC_URL) {
     throw new Error('❌ LỖI: Biến WC_URL chưa được cấu hình. Không thể fetch sản phẩm.');
   }
@@ -9,7 +9,7 @@ export async function getProducts() {
   try {
     // Fetch danh sách sản phẩm (Custom Post Type: product)
     // Sử dụng _embed để lấy thêm ảnh đại diện (featured media)
-    const response = await fetch(`${WC_URL}/wp-json/wp/v2/product?_embed=true&per_page=100&orderby=menu_order&order=asc`);
+    const response = await fetch(`${WC_URL}/wp-json/wp/v2/product?_embed=true&per_page=100&orderby=menu_order&order=asc&status=${status}`);
     
     if (!response.ok) {
       const errorText = await response.text();

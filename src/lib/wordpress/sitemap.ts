@@ -55,7 +55,8 @@ ${xmlEntries}
 Allow: /
 Disallow: /admin/
 Disallow: /private/
-
+Disallow: /wp-admin/
+Disallow: /wp-login.php
 Sitemap: ${baseUrl}/sitemap.xml`;
       // 4. Ghi file vào thư mục public
       const publicPath = path.resolve('public', 'sitemap.xml');

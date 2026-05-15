@@ -96,8 +96,7 @@ export async function getInfo() {
 
   try {
     const response = await fetch(
-      `${WC_URL}/wp-json/wp/v2/thong-tin-chung?_embed=true&v=${Date.now()}`,
-      { cache: 'no-store' }
+      `${WC_URL}/wp-json/wp/v2/thong-tin-chung?_embed=true&status=publish&v=${Date.now()}`
     );
     
     if (!response.ok) {

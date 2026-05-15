@@ -1,0 +1,221 @@
+---
+// src/pages/preview/[...slug].astro
+export const prerender = false; // Chế độ SSR để lấy dữ liệu động
+import { Head } from "@/components/Head";
+import "@/styles/global.css";
+import AppRouter from '@/components/Router';
+import { getProcessSteps } from '@/lib/wordpress/quytrinh';
+import { getCompre } from '@/lib/wordpress/sosanh';
+import { getInfo } from '@/lib/wordpress/trangchu';
+import { getPrivacyPage } from '@/lib/wordpress/chinhsachbaomat';
+import { getTermsPage } from '@/lib/wordpress/chinhsachdichvu';
+import { getAboutPage } from '@/lib/wordpress/gioithieu';
+import { getProducts } from '@/lib/wordpress/sanpham';
+import { stripHtmlAndUnescape } from '@/lib/stringUtils';
+
+let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
+
+const { slug } = Astro.params;
+const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
+
+// Fetch dữ liệu trực tiếp cho mỗi lần request (SSR)
+// Lưu ý: Truyền 'any' hoặc 'draft,publish' để lấy được bản nháp
+const data_process_steps = await getProcessSteps();
+const data_compre = await getCompre();
+const data_info = await getInfo();
+const data_privacy = await getPrivacyPage(data_info[0] || {});
+const data_terms = await getTermsPage(data_info[0] || {});
+const data_about_me = await getAboutPage(data_info[0] || {});
+const data_products = await getProducts(); 
+
+  const companyName = data_info[0]?.['tencongty'] || 'Vibe Code Studio';
+  
+  // Logic xác định Meta Data cho trang hiện tại dựa trên slug
+  // (Chúng ta tái sử dụng mảng pages để tìm thông tin SEO)
+  let pages = [
+    {
+      slug: undefined, // Trang chủ mặc định (vi)
+      title: `${companyName || 'Vibe Code Studio'}`,
+      description: 'Tốc Độ AI & Chất Lượng Developer Xây dựng website chuyên nghiệp với sức mạnh AI và tay nghề chuyên gia',
+      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+    },
+    {
+      slug: 'vi',
+      title: `${companyName || 'Vibe Code Studio'}`,
+      description: 'Tốc Độ AI & Chất Lượng Developer Xây dựng website chuyên nghiệp với sức mạnh AI và tay nghề chuyên gia',
+      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+    },
+    {
+      slug: 'en',
+      title: `${companyName || 'Vibe Code Studio'}`,
+      description: 'AI Velocity & Developer Precision Build professional websites with AI power and expert craftsmanship',
+      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+    },
+    {
+      slug: 'vi/contact',
+      title: `Liên Hệ | ${companyName}`,
+      description: 'Kết nối với đội ngũ phát triển của chúng tôi.',
+      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+    },
+    {
+      slug: 'en/contact',
+      title: `Contact Us | ${companyName}`,
+      description: 'Get in touch with our expert developers.',
+      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+    },
+    {
+      slug: 'vi/products',
+      title: `Sản Phẩm | ${companyName}`,
+      description: 'Khám phá các sản phẩm của chúng tôi.',
+      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+    },
+    {
+      slug: 'en/products',
+      title: `Products | ${companyName}`,
+      description: 'Explore our products.',
+      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+    }
+  ];
+
+  pages.push({
+    slug: 'vi/privacy',
+    title: `${data_privacy.title} | ${companyName}`,
+    description: stripHtmlAndUnescape(data_privacy.content) || '',
+    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+  });
+
+  pages.push({
+    slug: 'en/privacy',
+    title: `${data_privacy.en_title} | ${companyName}`,
+    description: stripHtmlAndUnescape(data_privacy.en_content) || '',
+    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+  });
+
+  pages.push({
+    slug: 'vi/terms',
+    title: `${data_terms.title || 'Terms of Service'} | ${companyName}`,
+    description: stripHtmlAndUnescape(data_terms.content) || '',
+    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+  });
+
+  pages.push({
+    slug: 'en/terms',
+    title: `${data_terms.en_title || 'Terms of Service'} | ${companyName}`,
+    description: stripHtmlAndUnescape(data_terms.en_content) || '',
+    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+  });
+
+  pages.push({
+    slug: 'vi/about',
+    title: `${data_about_me.title || 'About Us'} | ${companyName}`,
+    description: stripHtmlAndUnescape(data_about_me.content) || '',
+    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+  });
+
+  pages.push({
+    slug: 'en/about',
+    title: `${data_about_me.en_title || 'About Us'} | ${companyName}`,
+    description: stripHtmlAndUnescape(data_about_me.en_content) || '',
+    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+  });
+
+  data_products.forEach((product) => {
+    pages.push({
+      slug: `vi/products/${product.baseSlug}`,
+      title: `${product.title} | ${companyName}`,
+      description: stripHtmlAndUnescape(product.content) || '',
+      ogImage: product.image || `${WC_URL}/wp-content/uploads/og-image.jpg` 
+    });
+
+    pages.push({
+      slug: `en/products/${product.baseSlug}`,
+      title: `${product.en_title} | ${companyName}`,
+      description: stripHtmlAndUnescape(product.en_content) || '',
+      ogImage: product.image || `${WC_URL}/wp-content/uploads/og-image.jpg` 
+    });
+  });
+  
+// Tìm thông tin SEO của trang hiện tại từ danh sách pages
+const currentPageData = pages.find(p => p.slug === slug) || pages[0];
+const title = currentPageData.title;
+const description = currentPageData.description;
+const ogImage = currentPageData.ogImage;
+
+const lang = slug?.split('/')[0] === 'en' ? 'en' : 'vi';
+const locale = lang === 'en' ? 'en_US' : 'vi_VN';
+
+// Sử dụng Astro.url để lấy URL chính xác, đảm bảo không bị lỗi double slash
+const siteOrigin = (WC_URL_CLIENT || Astro.url.origin).replace(/\/$/, '');
+const currentPageUrl = new URL(Astro.url.pathname, siteOrigin).href;
+---
+
+<html lang={lang} class="w-full h-full">
+  <head>
+    <Head />
+    <meta name="robots" content="noindex, nofollow" /> <!-- Không cho phép index bản nháp -->
+
+    <!-- Basic SEO -->
+    <title>{title} (Preview)</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={currentPageUrl} />
+    <link
+        rel="icon"
+        href={data_info[0]?.['favicon'] || '/favicon.ico'}
+    />
+
+    <!-- Open Graph (Facebook, Zalo, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={currentPageUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content={locale} />
+    {ogImage && <meta property="og:image" content={siteOrigin + ogImage} />}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={currentPageUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={siteOrigin + ogImage} />}
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": data_info[0]?.['tencongty'] || "Vibe Code Studio",
+      "url": currentPageUrl,
+      "description": description,
+      "inLanguage": lang === 'en' ? 'en-US' : 'vi-VN',
+      "publisher": {
+        "@type": "Organization",
+        "name": data_info[0]?.['tencongty'] || "Vibe Code Studio",
+        "url": currentPageUrl,
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": data_info[0]?.['email'] || "contact@vibecodestudio.com",
+          "telephone": data_info[0]?.['sodienthoai'] || "+84123456789",
+          "contactType": "customer service",
+          "areaServed": "VN",
+          "availableLanguage": ["Vietnamese", "English"]
+        }
+      }
+    })} />
+  </head>
+  <body class="w-full h-full">
+    <div style="display:none">Build ID: {Date.now()}</div>
+    <div id="root" class="w-full h-full">
+        <AppRouter
+          client:load
+          data_process_steps={data_process_steps}
+          data_compre={data_compre}
+          data_info={data_info}
+          data_privacy={data_privacy}
+          data_terms={data_terms}
+          data_about_me={data_about_me}
+          data_products={data_products}
+          WC_URL={WC_URL || ''}
+          basename="/preview"
+        />
+    </div>
+  </body>
+</html>

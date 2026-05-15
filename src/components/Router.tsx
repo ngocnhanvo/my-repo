@@ -21,6 +21,7 @@ interface AppRouterProps {
   data_terms?: any;
   data_about_me?: any;
   data_products?: any[];
+  basename?: string; // Thêm prop này để kiểm soát URL gốc
 }
 
 // Layout component that includes ScrollToTop
@@ -106,9 +107,9 @@ export default function AppRouter(props: AppRouterProps) {
   const [router, setRouter] = useState<ReturnType<typeof createBrowserRouter> | null>(null);
 
   useEffect(() => {
-    // Khởi tạo router chỉ khi component đã mount trên client
+    // Ưu tiên basename từ props (cho bản nháp), nếu không có mới dùng env
     const routerInstance = createBrowserRouter(getRouterConfig(props), {
-      basename: import.meta.env.BASE_NAME,
+      basename: props.basename || import.meta.env.BASE_NAME || '/',
     });
     setRouter(routerInstance);
   }, [props]); // `props` ở đây là dữ liệu tĩnh từ Astro, nên `useEffect` chỉ chạy 1 lần

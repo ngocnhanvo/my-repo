@@ -9,7 +9,7 @@ export async function getAboutPage(infoData: WPInfo) { // Keep getAboutPage expo
 
   try {
     // Fetch trang giới thiệu tiếng Việt (slug: about-me)
-    const viResponse = await fetch(`${WC_URL}/wp-json/wp/v2/pages?slug=about-me&_embed=true`);
+    const viResponse = await fetch(`${WC_URL}/wp-json/wp/v2/pages?slug=about-me&_embed=true&status=publish`);
     if (!viResponse.ok) {
       const errorText = await viResponse.text();
       throw new Error(`❌ LỖI fetch About Page (VI) từ CMS: ${viResponse.status} ${viResponse.statusText} - ${errorText}`);
@@ -18,7 +18,7 @@ export async function getAboutPage(infoData: WPInfo) { // Keep getAboutPage expo
     const viPage = viPages.length > 0 ? viPages[0] : null;
 
     // Fetch trang giới thiệu tiếng Anh (slug: en_about-me)
-    const enResponse = await fetch(`${WC_URL}/wp-json/wp/v2/pages?slug=en_about-me&_embed=true`);
+    const enResponse = await fetch(`${WC_URL}/wp-json/wp/v2/pages?slug=en_about-me&_embed=true&status=publish`);
     if (!enResponse.ok) {
       const errorText = await enResponse.text();
       throw new Error(`❌ LỖI fetch About Page (EN) từ CMS: ${enResponse.status} ${enResponse.statusText} - ${errorText}`);

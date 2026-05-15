@@ -10,12 +10,12 @@ export async function getPrivacyPage(infoData: WPInfo) { // Renamed function to 
 
   try {
     // Fetch trang chính sách bảo mật tiếng Việt
-    const viResponse = await fetch(`${WC_URL}/wp-json/wp/v2/pages?slug=privacy-policy&_embed=true`);
+    const viResponse = await fetch(`${WC_URL}/wp-json/wp/v2/pages?slug=privacy-policy&_embed=true&status=publish`);
     const viPages = viResponse.ok ? await viResponse.json() : [];
     const viPage = viPages.length > 0 ? viPages[0] : null;
 
     // Fetch trang chính sách bảo mật tiếng Anh
-    const enResponse = await fetch(`${WC_URL}/wp-json/wp/v2/pages?slug=en_privacy-policy&_embed=true`);
+    const enResponse = await fetch(`${WC_URL}/wp-json/wp/v2/pages?slug=en_privacy-policy&_embed=true&status=publish`);
     const enPages = enResponse.ok ? await enResponse.json() : [];
     const enPage = enPages.length > 0 ? enPages[0] : null;
 
