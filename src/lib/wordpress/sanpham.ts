@@ -1,7 +1,7 @@
 import { processAndStoreImage } from './imageProcessor';
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
-export async function getProducts(status: string = 'publish') {
+export async function getProducts(status: string = 'publish', isPreview: boolean = false) {
   if (!WC_URL) {
     throw new Error('❌ LỖI: Biến WC_URL chưa được cấu hình. Không thể fetch sản phẩm.');
   }
@@ -68,6 +68,7 @@ export async function getProducts(status: string = 'publish') {
           imageUrl: p.image,
           wcUrl: WC_URL,
           publicDirBase: 'images/products', // Lưu vào thư mục riêng cho sản phẩm
+          isPreview: isPreview, // Truyền trạng thái preview
         });
       }
       return p;

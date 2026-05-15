@@ -89,7 +89,7 @@ export const content = {
     }
   };
 
-export async function getInfo() {
+export async function getInfo(isPreview: boolean = false) {
   if (!WC_URL) {
     throw new Error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables. Không thể fetch thông tin chung.');
   }
@@ -115,16 +115,19 @@ export async function getInfo() {
       imageUrl: logoUrl,
       wcUrl: WC_URL,
       publicDirBase: 'images/info', // Lưu ảnh logo/favicon vào thư mục riêng
+      isPreview: isPreview, // Truyền trạng thái preview
     });
     const processedFaviconUrl = await processAndStoreImage({
       imageUrl: faviconUrl,
       wcUrl: WC_URL,
       publicDirBase: 'images/info', // Lưu ảnh logo/favicon vào thư mục riêng
+      isPreview: isPreview, // Truyền trạng thái preview
     });
     const processedImageUrl = await processAndStoreImage({
       imageUrl: imageUrl,
       wcUrl: WC_URL,
       publicDirBase: 'images/info', // Lưu ảnh logo/favicon vào thư mục riêng
+      isPreview: isPreview, // Truyền trạng thái preview
     });
 
     return {

@@ -2,7 +2,7 @@ import { processAndStoreImage } from './imageProcessor'; // Import the new utili
 
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
-export async function getProcessSteps(status: string = 'publish') {
+export async function getProcessSteps(status: string = 'publish', isPreview: boolean = false) {
   if (!WC_URL) {
     console.error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables.');
     return [];
@@ -29,6 +29,7 @@ export async function getProcessSteps(status: string = 'publish') {
       imageUrl: absoluteImageUrl,
       wcUrl: WC_URL,
       publicDirBase: 'images/quytrinh', // Lưu ảnh quy trình vào thư mục riêng
+      isPreview: isPreview, // Truyền trạng thái preview
     });
 
     return {

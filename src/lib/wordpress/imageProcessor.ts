@@ -3,14 +3,21 @@ interface ProcessImageOptions {
   imageUrl: string;
   wcUrl?: string;
   publicDirBase?: string;
+  isPreview?: boolean; // Thêm tham số này để kiểm tra chế độ preview
 }
 
 export async function processAndStoreImage({
   imageUrl,
   wcUrl,
   publicDirBase = 'images',
+  isPreview = false, // Mặc định là false
 }: ProcessImageOptions): Promise<string> {
   if (!imageUrl) return '';
+
+  // Nếu đang ở chế độ preview, không cần xử lý ảnh, chỉ trả về URL gốc
+  if (isPreview) {
+    return imageUrl;
+  }
 
   // KIỂM TRA MÔI TRƯỜNG: Chỉ chạy code này nếu là Server (SSR)
   if (import.meta.env.SSR || typeof window === 'undefined') {
