@@ -55,6 +55,7 @@ ${xmlEntries}
 Allow: /
 Disallow: /admin/
 Disallow: /private/
+Disallow: /preview/
 Disallow: /wp-admin/
 Disallow: /wp-login.php
 Sitemap: ${baseUrl}/sitemap.xml`;
