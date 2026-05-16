@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion'; // Removed AnimatePresence as it's not used here
 import { Button } from '@/components/ui/button';
-import { Check, AlertTriangle, Zap, Code, Globe, ArrowRight, Terminal, Cpu, Layers, ChevronRight, ExternalLink } from 'lucide-react';
+import { Check, AlertTriangle, Zap, Code, Globe, Terminal, Cpu, Layers, ChevronRight, ExternalLink } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { content } from '@/lib/wordpress/trangchu';
@@ -612,7 +612,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
                 color: 'text-primary', 
                 bg: 'bg-primary/10', 
                 border: 'border-primary/30',
-                href: "https://www.google.com/maps/search/?api=1&query=10.877367565856778,106.76548063620464"
+                href: infoData[`googlemap`]
               },
               { 
                 icon: Code, 

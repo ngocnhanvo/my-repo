@@ -136,6 +136,7 @@ export async function getInfo(isPreview: boolean = false) {
       en_tencongty: item.acf.en_tencongty || '',
       diachi: item.acf.diachi || '',
       en_diachi: item.acf.en_diachi || '',
+      googlemap: item.acf.googlemap || '',
       sodienthoai: item.acf.sodienthoai || '',
       email: item.acf.email || '',
       domain: item.acf.domain || '',

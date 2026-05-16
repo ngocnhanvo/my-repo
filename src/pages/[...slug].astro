@@ -39,43 +39,43 @@ export async function getStaticPaths() {
   let pages = [
     {
       slug: undefined, // Trang chủ mặc định (vi)
-      title: `${companyName || 'Vibe Code Studio'}`,
+      title: `${companyName || 'Vibe Code Studio'} - Website tốc độ cao - kết hợp giữa AI và chuyên gia`,
       description: 'Tốc Độ AI & Chất Lượng Developer Xây dựng website chuyên nghiệp với sức mạnh AI và tay nghề chuyên gia',
       ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'vi',
-      title: `${companyName || 'Vibe Code Studio'}`,
+      title: `${companyName || 'Vibe Code Studio'} - Website tốc độ cao - kết hợp giữa AI và chuyên gia`,
       description: 'Tốc Độ AI & Chất Lượng Developer Xây dựng website chuyên nghiệp với sức mạnh AI và tay nghề chuyên gia',
       ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'en',
-      title: `${companyName || 'Vibe Code Studio'}`,
+      title: `${companyName || 'Vibe Code Studio'} - High-Speed Website - Combining AI and Expertise`,
       description: 'AI Velocity & Developer Precision Build professional websites with AI power and expert craftsmanship',
       ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'vi/contact',
-      title: `Liên Hệ | ${companyName}`,
+      title: `Liên Hệ - ${companyName} - ${data_info[0]?.['diachi'] || ''}`,
       description: 'Kết nối với đội ngũ phát triển của chúng tôi.',
       ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'en/contact',
-      title: `Contact Us | ${companyName}`,
+      title: `Contact Us - ${companyName} - ${data_info[0]?.['en_diachi'] || ''}`,
       description: 'Get in touch with our expert developers.',
       ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'vi/products',
-      title: `Sản Phẩm | ${companyName}`,
+      title: `Sản Phẩm - ${companyName} - Ba gói dịch vụ phát triển website chuyên nghiệp`,
       description: 'Khám phá các sản phẩm của chúng tôi.',
       ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'en/products',
-      title: `Products | ${companyName}`,
+      title: `Products - ${companyName} - Three Professional Website Development Packages`,
       description: 'Explore our products.',
       ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     }
@@ -83,42 +83,42 @@ export async function getStaticPaths() {
 
   pages.push({
     slug: 'vi/privacy',
-    title: `${data_privacy.title} | ${companyName}`,
+    title: `${data_privacy.title} - ${companyName}`,
     description: stripHtmlAndUnescape(data_privacy.content) || '',
     ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
   });
 
   pages.push({
     slug: 'en/privacy',
-    title: `${data_privacy.en_title} | ${companyName}`,
+    title: `${data_privacy.en_title} - ${companyName}`,
     description: stripHtmlAndUnescape(data_privacy.en_content) || '',
     ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
   });
 
   pages.push({
     slug: 'vi/terms',
-    title: `${data_terms.title || 'Terms of Service'} | ${companyName}`,
+    title: `${data_terms.title || 'Terms of Service'} - ${companyName}`,
     description: stripHtmlAndUnescape(data_terms.content) || '',
     ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
   });
 
   pages.push({
     slug: 'en/terms',
-    title: `${data_terms.en_title || 'Terms of Service'} | ${companyName}`,
+    title: `${data_terms.en_title || 'Terms of Service'} - ${companyName}`,
     description: stripHtmlAndUnescape(data_terms.en_content) || '',
     ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
   });
 
   pages.push({
     slug: 'vi/about',
-    title: `${data_about_me.title || 'About Us'} | ${companyName}`,
+    title: `${data_about_me.title || 'About Us'} - ${companyName} - Tìm hiểu thêm về chúng tôi`,
     description: stripHtmlAndUnescape(data_about_me.content) || '',
     ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
   });
 
   pages.push({
     slug: 'en/about',
-    title: `${data_about_me.en_title || 'About Us'} | ${companyName}`,
+    title: `${data_about_me.en_title || 'About Us'} - ${companyName} - Learn More About Us`,
     description: stripHtmlAndUnescape(data_about_me.en_content) || '',
     ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
   });
@@ -126,14 +126,14 @@ export async function getStaticPaths() {
   data_products.forEach((product) => {
     pages.push({
       slug: `vi/products/${product.baseSlug}`,
-      title: `${product.title} | ${companyName}`,
+      title: `${product.title} - ${companyName}`,
       description: stripHtmlAndUnescape(product.content) || '',
       ogImage: product.image || `${WC_URL}/wp-content/uploads/og-image.jpg` 
     });
 
     pages.push({
       slug: `en/products/${product.baseSlug}`,
-      title: `${product.en_title} | ${companyName}`,
+      title: `${product.en_title} - ${companyName}`,
       description: stripHtmlAndUnescape(product.en_content) || '',
       ogImage: product.image || `${WC_URL}/wp-content/uploads/og-image.jpg` 
     });

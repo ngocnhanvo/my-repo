@@ -59,6 +59,7 @@ export interface WPInfo {
   en_tencongty?: string;
   diachi?: string;
   en_diachi?: string;
+  googlemap?: string;
   sodienthoai?: string;
   email?: string;
   domain?: string;
