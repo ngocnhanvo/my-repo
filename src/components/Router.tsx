@@ -1,4 +1,4 @@
-import { MemberProvider } from '@/integrations';
+import React, { useState, useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, Outlet, useParams, useLocation, useNavigate, ScrollRestoration } from 'react-router-dom';
 import ErrorPage from '@/integrations/errorHandlers/ErrorPage'; // Keep ErrorPage
 import HomePage from '@/components/pages/HomePage';
@@ -8,10 +8,11 @@ import ContactPage from '@/components/pages/ContactPage';
 import AboutPage from '@/components/pages/AboutPage';
 import ProductListPage from '@/components/pages/ProductListPage';
 import ProductDetailPage from '@/components/pages/ProductDetailPage';
-import React, { useState, useEffect } from 'react'; // Import React, useState, useEffect
+import { MemberProvider } from '@/integrations';
 import { WPProcessStep, WPComparison, WPInfo } from '@/entities';
 import { HelmetProvider } from 'react-helmet-async';
 import NotFoundPage from './pages/NotFoundPage';
+import { Loader2 } from 'lucide-react';
 
 interface AppRouterProps {
   data_process_steps: WPProcessStep[];
@@ -155,7 +156,15 @@ export default function AppRouter(props: AppRouterProps) {
   }, [props]); // `props` ở đây là dữ liệu tĩnh từ Astro, nên `useEffect` chỉ chạy 1 lần
 
   if (!router) {
-    return null; // Không render gì cho đến khi router được khởi tạo trên client
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <div className="relative">
+          <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <div className="absolute inset-0 blur-lg bg-primary/20 animate-pulse rounded-full" />
+        </div>
+        <span className="font-mono text-[10px] tracking-[0.2em] text-primary/60 uppercase">Initializing System...</span>
+      </div>
+    );
   }
 
   return (
