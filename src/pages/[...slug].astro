@@ -170,6 +170,7 @@ const locale = lang === 'en' ? 'en_US' : 'vi_VN';
 // Sử dụng Astro.url để lấy URL chính xác, đảm bảo không bị lỗi double slash
 const siteOrigin = (WC_URL_CLIENT || Astro.url.origin).replace(/\/$/, '');
 const currentPageUrl = new URL(Astro.url.pathname, siteOrigin).href;
+const currentPageUrl2 = currentPageUrl == siteOrigin + '/' ? currentPageUrl + 'vi' : currentPageUrl;
 ---
 
 <html lang={lang} class="w-full h-full">
@@ -180,7 +181,7 @@ const currentPageUrl = new URL(Astro.url.pathname, siteOrigin).href;
     <title>{Astro.props.title}</title>
     <meta name="description" content={Astro.props.description} />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href={currentPageUrl} />
+    <link rel="canonical" href={currentPageUrl2} />
     <link
         rel="icon"
         href={data_info[0]?.['favicon'] || '/favicon.ico'}
@@ -188,7 +189,7 @@ const currentPageUrl = new URL(Astro.url.pathname, siteOrigin).href;
 
     <!-- Open Graph (Facebook, Zalo, LinkedIn) -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={currentPageUrl} />
+    <meta property="og:url" content={currentPageUrl2} />
     <meta property="og:title" content={Astro.props.title} />
     <meta property="og:description" content={Astro.props.description} />
     <meta property="og:locale" content={locale} />
@@ -198,7 +199,7 @@ const currentPageUrl = new URL(Astro.url.pathname, siteOrigin).href;
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content={currentPageUrl} />
+    <meta name="twitter:url" content={currentPageUrl2} />
     <meta name="twitter:title" content={Astro.props.title} />
     <meta name="twitter:description" content={Astro.props.description} />
     {Astro.props.ogImage && <meta name="twitter:image" content={siteOrigin + Astro.props.ogImage} />}
@@ -208,7 +209,7 @@ const currentPageUrl = new URL(Astro.url.pathname, siteOrigin).href;
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": data_info[0]?.['tencongty'] || "Vibe Code Studio",
-      "url": currentPageUrl,
+      "url": currentPageUrl2,
       "description": Astro.props.description,
       "inLanguage": lang === 'en' ? 'en-US' : 'vi-VN',
       "publisher": {
