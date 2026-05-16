@@ -11,6 +11,7 @@ import ProductDetailPage from '@/components/pages/ProductDetailPage';
 import React, { useState, useEffect } from 'react'; // Import React, useState, useEffect
 import { WPProcessStep, WPComparison, WPInfo } from '@/entities';
 import { HelmetProvider } from 'react-helmet-async';
+import NotFoundPage from './pages/NotFoundPage';
 
 interface AppRouterProps {
   data_process_steps: WPProcessStep[];
@@ -52,6 +53,18 @@ function LayoutWithLanguage() {
   );
 }
 
+function LanguageGuard({ children, ...props }: { children: React.ReactNode } & AppRouterProps) {
+  const { lang } = useParams<{ lang: string }>();
+
+  // Nếu lang không phải vi hoặc en, chặn lại và trả về NotFoundPage luôn
+  if (lang !== 'vi' && lang !== 'en') {
+    return <NotFoundPage {...props} />;
+  }
+
+  // Nếu hợp lệ, cho phép hiển thị Component con (ở đây là HomePage)
+  return <>{children}</>;
+}
+
 const getRouterConfig = (props: AppRouterProps) => ([
   { // Route configuration
     path: "/", 
@@ -64,41 +77,68 @@ const getRouterConfig = (props: AppRouterProps) => ([
       },
       {
         path: ":lang", // Route for language prefix
-        element: <HomePage {...props} />,
+        element: (
+          <LanguageGuard {...props}>
+            <HomePage {...props} />
+          </LanguageGuard>
+        ),
       },
       {
         path: ":lang/privacy",
-        element: <PrivacyPage {...props} />,
+        element: (
+          <LanguageGuard {...props}>
+            <PrivacyPage {...props} />
+          </LanguageGuard>
+        ),
       },
       {
         path: ":lang/terms",
-        element: <TermsPage {...props} />,
+        element: (
+          <LanguageGuard {...props}>
+            <TermsPage {...props} />
+          </LanguageGuard>
+        ),
       },
       {
         path: ":lang/contact",
-        element: <ContactPage {...props} />,
+        element: (
+          <LanguageGuard {...props}>
+            <ContactPage {...props} />
+          </LanguageGuard>
+        ),
       },
       {
         path: ":lang/about",
-        element: <AboutPage {...props} />,
+        element: (
+          <LanguageGuard {...props}>
+            <AboutPage {...props} />
+          </LanguageGuard>
+        ),
       },
       {
         path: ":lang/products",
-        element: <ProductListPage {...props} />,
+        element: (
+          <LanguageGuard {...props}>
+            <ProductListPage {...props} />
+          </LanguageGuard>
+        ),
       },
       {
         path: ":lang/products/:slug",
-        element: <ProductDetailPage {...props} />,
+        element: (
+          <LanguageGuard {...props}>
+            <ProductDetailPage {...props} />
+          </LanguageGuard>
+        ),
       },
       {
-        path: ":lang/*", // Catch-all for other paths with language prefix
-        element: <HomePage {...props} />, // Or a more specific component if needed
+        path: ":lang/*", 
+        element: <NotFoundPage {...props} />,
       },
-      // Fallback for paths without language prefix, redirect to default language
       {
-        path: "*",
-        element: <Navigate to="/vi" replace />,
-      },
+        path: "*", 
+        element: <NotFoundPage {...props} />,
+      }
     ],
   },
 ]);
