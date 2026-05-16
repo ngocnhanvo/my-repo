@@ -25,7 +25,8 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
         about: 'Giới Thiệu',
         products: 'Sản Phẩm',
         contact: 'Liên Hệ'
-      }
+      },
+      toggleMenu: 'Mở/Đóng menu'
     },
     en: {
       nav: {
@@ -33,7 +34,8 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
         about: 'About',
         products: 'Products',
         contact: 'Contact'
-      }
+      },
+      toggleMenu: 'Toggle menu'
     }
   };
 
@@ -173,6 +175,7 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={t.toggleMenu}
               className="lg:hidden text-foreground p-2 hover:bg-primary/10 rounded-lg transition-colors"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
