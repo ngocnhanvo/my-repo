@@ -12,6 +12,7 @@ import { getAboutPage } from '../lib/wordpress/gioithieu';
 import { getProducts } from '../lib/wordpress/sanpham';
 import { generateAndSaveSitemap } from '../lib/wordpress/sitemap';
 import { stripHtmlAndUnescape } from '../lib/stringUtils';
+import interFont from "public/fonts/inter/v20/UcCo3FwrK3iLTcvsYwYZ8UA3J58.woff2";
 
 let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
 export async function getStaticPaths() {
@@ -185,6 +186,13 @@ const currentPageUrl2 = currentPageUrl == siteOrigin + '/' ? currentPageUrl + 'v
     <link
         rel="icon"
         href={data_info[0]?.['favicon'] || '/favicon.ico'}
+    />
+    <link
+      rel="preload"
+      href={interFont}
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
 
     <!-- Open Graph (Facebook, Zalo, LinkedIn) -->
