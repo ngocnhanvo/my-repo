@@ -12,8 +12,9 @@ import { getAboutPage } from '../lib/wordpress/gioithieu';
 import { getProducts } from '../lib/wordpress/sanpham';
 import { generateAndSaveSitemap } from '../lib/wordpress/sitemap';
 import { stripHtmlAndUnescape } from '../lib/stringUtils';
-import interFont from "public/fonts/inter/v20/UcCo3FwrK3iLTcvsYwYZ8UA3J58.woff2";
-
+import interFont1 from "public/fonts/inter/v20/UcCo3FwrK3iLTcvsYwYZ8UA3J58.woff2";
+import interFont2 from "public/fonts/inter/v20/UcCo3FwrK3iLTcvtYwYZ8UA3J58.woff2";
+import interFont3 from "public/fonts/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2";
 let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
 export async function getStaticPaths() {
   const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
@@ -189,7 +190,23 @@ const currentPageUrl2 = currentPageUrl == siteOrigin + '/' ? currentPageUrl + 'v
     />
     <link
       rel="preload"
-      href={interFont}
+      href={interFont1}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <link
+      rel="preload"
+      href={interFont2}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <link
+      rel="preload"
+      href={interFont3}
       as="font"
       type="font/woff2"
       crossorigin
