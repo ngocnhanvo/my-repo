@@ -34,7 +34,7 @@ export default function ProductDetailPage({ data_info, data_products = [] }: Pro
 
   return (
     <div className="min-h-screen bg-background text-foreground font-paragraph">
-      <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} />
+      <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} data_products={data_products} />
       
       <main className="pt-40 pb-20">
         <div className="max-w-4xl mx-auto px-6">

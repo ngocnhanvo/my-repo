@@ -11,6 +11,7 @@ interface AboutPageProps {
   data_info: WPInfo[];
   WC_URL: string;
   data_about_me?: any; 
+  data_products?: any[];
 }
 
 interface OutletContextType {
@@ -18,7 +19,7 @@ interface OutletContextType {
   setLanguage: (lang: 'vi' | 'en') => void;
 }
 
-export default function AboutPage({ data_info, data_about_me }: AboutPageProps) {
+export default function AboutPage({ data_info, data_about_me, data_products }: AboutPageProps) {
   const { language, setLanguage } = useOutletContext<OutletContextType>();
   const infoData = data_info[0] || { id: 0 };
   const prefixWP = language === 'en' ? 'en_' : '';
@@ -60,7 +61,7 @@ export default function AboutPage({ data_info, data_about_me }: AboutPageProps) 
 
   return (
     <div className="min-h-screen bg-background text-foreground font-paragraph selection:bg-primary/30 selection:text-primary">
-      <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} />
+      <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} data_products={data_products} />
       
       <main className="pt-40 pb-20">
         <div className="max-w-4xl mx-auto px-6">

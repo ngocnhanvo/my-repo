@@ -1,20 +1,21 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Menu, X, Globe } from 'lucide-react';
+import { Menu, X, Globe, ChevronDown } from 'lucide-react';
 import { WPInfo } from '@/entities';
 import { useLocation, useNavigate } from 'react-router-dom'; // Import useLocation, useNavigate
-import { getWebpPath } from '@/lib/stringUtils';
+import { getWebpPath, resolvePlaceholders } from '@/lib/stringUtils';
 
 interface HeaderProps {
   language: 'vi' | 'en';
   infoData: WPInfo; // Thêm prop infoData để truyền dữ liệu từ HomePage
   prefixWP: string; // Thêm prop prefixWP để truyền dữ liệu từ HomePage
   setLanguage: (lang: 'vi' | 'en') => void;
+  data_products?: any[]; // Thêm data_products vào props
 }
 
-export default function Header({ language, infoData, prefixWP, setLanguage }: HeaderProps) {
+export default function Header({ language, infoData, prefixWP, setLanguage, data_products }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileSubmenuOpen, setIsMobileSubmenuOpen] = useState(false);
   const location = useLocation(); // Get current location to construct new URLs
   const navigate = useNavigate();
 
@@ -61,7 +62,14 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
   const navItems = [
     { label: t.nav.home, href: '#hero' },
     { label: t.nav.about, href: '/about' },
-    { label: t.nav.products, href: '/products' },
+    { 
+      label: t.nav.products, 
+      href: '/products',
+      children: data_products?.map(p => ({
+        label: resolvePlaceholders(language === 'en' ? (p.en_title || p.title) : (p.title || p.en_title), infoData),
+        href: `/products/${p.baseSlug || p.slug}`
+      }))
+    },
     { label: t.nav.contact, href: '/contact' } // Thay đổi để dẫn đến trang /contact
   ];
 
@@ -120,25 +128,42 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
             {navItems.map((item, index) => (
-              <motion.button
-                key={item.href}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                onClick={() => handleNavClick(item.href)} // For anchor links, we still want to scroll within the current page
-                className={`relative py-2 transition-colors font-medium ${
-                  isActive(item.href) ? "text-primary" : "text-foreground/80 hover:text-primary"
-                }`}
-              >
-                {item.label}
-                {/* Gạch chân dưới menu khi active */}
-                {isActive(item.href) && (
-                  <motion.div
-                    layoutId="activeUnderline"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                  />
+              <div key={item.href} className="relative group">
+                <motion.button
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  onClick={() => handleNavClick(item.href)}
+                  className={`relative py-2 transition-colors font-medium flex items-center gap-1 ${
+                    isActive(item.href) ? "text-primary" : "text-foreground/80 hover:text-primary"
+                  }`}
+                >
+                  {item.label}
+                  {item.children && <ChevronDown className="w-4 h-4 opacity-50 group-hover:rotate-180 transition-transform" />}
+                  {isActive(item.href) && (
+                    <motion.div
+                      layoutId="activeUnderline"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
+                    />
+                  )}
+                </motion.button>
+
+                {/* Desktop Dropdown */}
+                {item.children && (
+                  <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                    <div className="bg-[#0a0a0a] border border-primary/20 min-w-[240px] p-2 flex flex-col shadow-2xl shadow-primary/20">
+                      {item.children.map((subItem) => (
+                        <button
+                          key={subItem.href}
+                          onClick={() => handleNavClick(subItem.href)}
+                          className="text-left px-4 py-3 text-sm text-foreground/70 hover:text-primary hover:bg-primary/5 transition-colors font-mono"
+                          dangerouslySetInnerHTML={{ __html: subItem.label }}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </motion.button>
+              </div>
             ))}
           </nav>
 
@@ -193,15 +218,38 @@ export default function Header({ language, infoData, prefixWP, setLanguage }: He
           >
             <div className="flex flex-col gap-4">
               {navItems.map((item) => (
-                <button
-                  key={item.href}
-                  onClick={() => handleNavClick(item.href)}
-                  className={`transition-colors font-medium text-left py-2 border-l-4 pl-3 ${
-                    isActive(item.href) ? "text-primary border-primary bg-primary/5" : "text-foreground/80 border-transparent"
-                  }`}
-                >
-                  {item.label}
-                </button>
+                <div key={item.href} className="flex flex-col">
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => handleNavClick(item.href)}
+                      className={`transition-colors font-medium text-left py-2 border-l-4 pl-3 flex-1 ${
+                        isActive(item.href) ? "text-primary border-primary bg-primary/5" : "text-foreground/80 border-transparent"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                    {item.children && (
+                      <button 
+                        onClick={() => setIsMobileSubmenuOpen(!isMobileSubmenuOpen)}
+                        className="p-2 text-foreground/50"
+                      >
+                        <ChevronDown className={`w-5 h-5 transition-transform ${isMobileSubmenuOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                    )}
+                  </div>
+                  {item.children && isMobileSubmenuOpen && (
+                    <div className="flex flex-col ml-4 mt-2 border-l border-white/10">
+                      {item.children.map((subItem) => (
+                        <button
+                          key={subItem.href}
+                          onClick={() => handleNavClick(subItem.href)}
+                          className="text-left px-6 py-3 text-sm text-foreground/60 font-mono"
+                          dangerouslySetInnerHTML={{ __html: subItem.label }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </motion.nav>

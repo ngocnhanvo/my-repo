@@ -11,6 +11,7 @@ interface ContactPageProps {
   data_compre: WPComparison[];
   data_info: WPInfo[]; // Keep data_info as it's used
   WC_URL: string; // Keep WC_URL if it's needed for other purposes, though not directly used here
+  data_products?: any[];
 }
 
 interface OutletContextType {
@@ -18,7 +19,7 @@ interface OutletContextType {
   setLanguage: (lang: 'vi' | 'en') => void;
 }
 
-export default function ContactPage({ data_info }: ContactPageProps) {
+export default function ContactPage({ data_info, data_products }: ContactPageProps) {
   const { language, setLanguage } = useOutletContext<OutletContextType>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -133,7 +134,7 @@ export default function ContactPage({ data_info }: ContactPageProps) {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-paragraph selection:bg-primary/30 selection:text-primary">
-      <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} />
+      <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} data_products={data_products} />
       
       <main className="pt-40 pb-20">
         <div className="max-w-4xl mx-auto px-6">

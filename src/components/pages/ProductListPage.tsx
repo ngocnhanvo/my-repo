@@ -25,7 +25,7 @@ export default function ProductListPage({ data_info, data_products = [] }: Produ
 
   return (
     <div className="min-h-screen bg-background text-foreground font-paragraph">
-      <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} />
+      <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} data_products={data_products} />
       
       <main className="pt-40 pb-20">
         <div className="max-w-[120rem] mx-auto px-6 lg:px-12">

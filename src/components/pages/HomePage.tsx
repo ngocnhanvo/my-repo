@@ -15,6 +15,7 @@ interface HomePageProps {
   data_process_steps: WPProcessStep[];
   data_compre: WPComparison[];
   data_info: WPInfo[];
+  data_products?: any[];
   WC_URL: string;
 }
 // Define the context type
@@ -22,7 +23,7 @@ interface OutletContextType {
   language: 'vi' | 'en';
   setLanguage: (lang: 'vi' | 'en') => void;
 }
-export default function HomePage({ data_process_steps, data_compre, data_info, WC_URL }: HomePageProps) {
+export default function HomePage({ data_process_steps, data_compre, data_info, data_products, WC_URL }: HomePageProps) {
   // Get language and setLanguage from OutletContext
   const { language, setLanguage } = useOutletContext<OutletContextType>();
   const location = useLocation();
@@ -120,7 +121,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
         }
       `}</style>
 
-      <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} />
+      <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} data_products={data_products} />
 
       {/* HERO SECTION - The Digital Forge */}
       <section 
