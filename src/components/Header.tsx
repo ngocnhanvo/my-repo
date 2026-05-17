@@ -129,6 +129,10 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
                   src={infoData.logo} 
                   alt={infoData[`${prefixWP}tencongty`] || 'Logo'} 
                   className="w-full h-full object-contain p-1.5"
+                  width="40"
+                  height="40"
+                  fetchPriority="high"
+                  decoding="async"
                 />
                 </picture>
               ) : (

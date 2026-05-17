@@ -86,6 +86,10 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
                     src={infoData.logo} 
                     alt={infoData[`${prefixWP}tencongty`] || 'Logo'} 
                     className="w-full h-full object-contain p-1.5"
+                    width="48"
+                    height="48"
+                    loading="lazy"
+                    decoding="async"
                   />
                   </picture>
                 ) : (
