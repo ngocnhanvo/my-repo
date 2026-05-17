@@ -38,19 +38,14 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
   const processRef = useRef<HTMLDivElement>(null);
   const comparisonRef = useRef<HTMLDivElement>(null);
 
-  const { scrollYProgress: heroProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"]
-  });
-
-  const { scrollYProgress: processProgress } = useScroll({
-    target: processRef,
-    offset: ["start end", "end start"]
-  });
+  // Loại bỏ heroProgress nếu không muốn Hero Section có hiệu ứng parallax/fade
+  // const { scrollYProgress: heroProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const { scrollYProgress: processProgress } = useScroll({ target: processRef, offset: ["start end", "end start"] });
 
   // Parallax transforms
-  const heroY = useTransform(heroProgress, [0, 1], ["0%", "50%"]);
-  const heroOpacity = useTransform(heroProgress, [0, 0.8], [1, 0]);
+  // Loại bỏ heroY và heroOpacity để vô hiệu hóa hiệu ứng trượt và mờ dần cho Hero Section
+  // const heroY = useTransform(heroProgress, [0, 1], ["0%", "50%"]);
+  // const heroOpacity = useTransform(heroProgress, [0, 0.8], [1, 0]);
   const processLineHeight = useTransform(processProgress, [0.2, 0.8], ["0%", "100%"]);
   let prefixWP = language === 'en' ? 'en_' : '';
   
@@ -138,17 +133,15 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
         <div className="absolute inset-0 tech-grid z-0 opacity-50" />
         
         {/* Glowing Orbs */}
-        <motion.div 
-          style={{ y: useTransform(heroProgress, [0, 1], ["0%", "100%"]) }}
+        <div 
           className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] bg-primary/10 rounded-full blur-[120px] z-0 pointer-events-none"
         />
-        <motion.div 
-          style={{ y: useTransform(heroProgress, [0, 1], ["0%", "-100%"]) }}
+        <div 
           className="absolute bottom-1/4 right-1/4 w-[30vw] h-[30vw] bg-secondary/10 rounded-full blur-[100px] z-0 pointer-events-none"
         />
 
-        <motion.div 
-          style={{ y: heroY, opacity: heroOpacity }}
+        <motion.div
+          // Loại bỏ style={{ y: heroY, opacity: heroOpacity }} để vô hiệu hóa hiệu ứng trượt và mờ dần
           className="relative z-10 w-full max-w-[120rem] mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-12 lg:gap-24"
         >
           {/* Left Content - Typography as Code */}
@@ -183,7 +176,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="max-w-2xl space-y-6"
+            className="max-w-2xl space-y-6 lg:text-justify"
             >
               <p className="text-xl lg:text-2xl text-foreground/90 font-medium border-l-2 border-secondary/50 pl-6">
                 {t.hero.subtitle}
@@ -211,12 +204,11 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
               </Button>
               <Button 
                 size="lg" 
-                variant="outline" 
-                className="clip-edge border-secondary/50 text-foreground hover:bg-secondary/10 hover:text-secondary hover:border-secondary font-medium px-10 py-7 text-lg rounded-none transition-all duration-300"
+                className="clip-edge bg-white text-black hover:bg-white/90 font-bold px-10 py-7 text-lg rounded-none transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] group"
                 onClick={() => document.getElementById('process')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <span className="flex items-center gap-3">
-                  <Cpu className="w-5 h-5" />
+                  <Cpu className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                   {t.hero.ctaSecondary}
                 </span>
               </Button>
@@ -291,7 +283,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
           <div className="flex flex-col lg:flex-row gap-16">
             
             {/* Sticky Header */}
-            <div className="lg:w-1/3 lg:sticky lg:top-32 h-fit space-y-6">
+            <div className="flex flex-col items-center text-center lg:items-start lg:text-left lg:w-1/3 lg:sticky lg:top-32 h-fit space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary/10 border border-secondary/20 text-secondary text-xs font-mono uppercase">
                 <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
                 Sequence Initiated
@@ -340,7 +332,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
                         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                         
                         <div className="flex flex-col xl:flex-row gap-8 relative z-10">
-                          <div className="flex-1 space-y-4">
+                          <div className="flex-1 space-y-4 lg:text-justify">
                             <div className="md:hidden text-primary font-mono text-sm mb-2">
                               // Phase 0{step.order}
                             </div>
@@ -421,10 +413,10 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
             {isLoadingComparison ? (
                <div className="h-[400px] glass-panel animate-pulse" />
             ) : comparisonData.length > 0 ? (
-              <div className="overflow-x-auto pb-8">
-                <div className="min-w-[800px] w-full">
+              <div className="pb-8">
+                <div className="w-full lg:text-justify">
                   {/* Table Header */}
-                  <div className="grid grid-cols-12 gap-4 mb-4 px-6 text-xs font-mono uppercase tracking-wider text-foreground/50">
+                  <div className="hidden md:grid grid-cols-12 gap-4 mb-4 px-6 text-xs font-mono uppercase tracking-wider text-foreground/50">
                     <div className="col-span-4">{t.comparison.feature}</div>
                     <div className="col-span-4 text-primary">{t.comparison.vibeStudio}</div>
                     <div className="col-span-4">{t.comparison.standardWix}</div>
@@ -439,11 +431,11 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.4, delay: index * 0.05 }}
-                        className="grid grid-cols-12 gap-4 p-6 glass-panel hover:bg-white/[0.02] transition-colors items-start group"
+                        className="flex flex-col md:grid md:grid-cols-12 gap-6 md:gap-4 p-6 glass-panel bg-white/[0.02] md:hover:bg-white/[0.02] transition-colors items-start group"
                       >
                         {/* Feature Column */}
-                        <div className="col-span-4 pr-4 border-r border-white/10">
-                          <p className="font-bold text-foreground text-lg mb-1 group-hover:text-primary transition-colors">
+                        <div className="md:col-span-4 pr-0 md:pr-4 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 w-full">
+                          <p className="font-bold text-foreground text-xl md:text-lg mb-1 text-primary md:group-hover:text-primary transition-colors">
                             {item[`${prefixWP}thongsokythuat`]}
                           </p>
                           {item[`${prefixWP}thongsokythuat`] && (
@@ -454,8 +446,9 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
                         </div>
 
                         {/* Vibe Studio Column (Highlighted) */}
-                        <div className="col-span-4 px-4 relative">
-                          <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                        <div className="md:col-span-4 px-0 md:px-4 relative w-full">
+                          <div className="md:hidden text-[10px] font-mono uppercase text-primary mb-2 tracking-tighter opacity-50">{t.comparison.vibeStudio}</div>
+                          <div className="absolute inset-0 bg-primary/5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity pointer-events-none" />
                           <div className="flex items-start gap-3 relative z-10">
                             <div className="mt-1 bg-primary/20 p-1 rounded-sm">
                               <Check className="w-4 h-4 text-primary" />
@@ -474,7 +467,8 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
                         </div>
 
                         {/* Standard Wix Column */}
-                        <div className="col-span-4 pl-4 border-l border-white/10 opacity-100 group-hover:opacity-100 transition-opacity">
+                        <div className="md:col-span-4 pl-0 md:pl-4 border-t md:border-t-0 md:border-l border-white/10 pt-6 md:pt-0 w-full opacity-100 group-hover:opacity-100 transition-opacity">
+                          <div className="md:hidden text-[10px] font-mono uppercase text-foreground/50 mb-2 tracking-tighter opacity-50">{t.comparison.standardWix}</div>
                           <div className="flex items-start gap-3">
                             <div className="mt-1 bg-white/10 p-1 rounded-sm">
                               <AlertTriangle className="w-4 h-4 text-foreground/50" />
@@ -518,7 +512,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-8"
+              className="space-y-8 flex flex-col items-center text-center lg:items-start lg:text-left"
             >
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-xs font-mono uppercase">
                 <Zap className="w-4 h-4" />
@@ -538,7 +532,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, W
                 </li>
                 <li className="flex items-center gap-3">
                   <ChevronRight className="w-4 h-4 text-accent-blue" />
-                  {language === 'vi' ? 'Ứng dụng AI trong phát triển website' : 'AI-assisted website development'}
+                  {language === 'vi' ? 'Ứng dụng công nghệ mới và AI' : 'Leveraging new technologies and AI'}
                 </li>
                 <li className="flex items-center gap-3">
                   <ChevronRight className="w-4 h-4 text-accent-blue" />

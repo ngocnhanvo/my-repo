@@ -1,0 +1,13 @@
+/* src/styles/index.css */
+
+@layer components {
+  .article-content {
+    /* Căn lề đều hai bên cho toàn bộ nội dung */
+    text-align: justify;
+  }
+
+  /* Đảm bảo các thẻ p bên trong (thường đổ từ CMS về) cũng được justify */
+  .article-content p {
+    text-align: justify;
+  }
+}
