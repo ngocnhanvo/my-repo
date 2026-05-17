@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { WPInfo, WPProcessStep, WPComparison } from '@/entities';
@@ -66,8 +66,10 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '' });
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [isCaptchaLoading, setIsCaptchaLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [countdown, setCountdown] = useState(5);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
 
   const validatePhone = (phone: string) => {
     // Regex cho số điện thoại Việt Nam: bắt đầu bằng 0 hoặc +84, theo sau là các đầu số 3,5,7,8,9 và 8 chữ số
@@ -88,14 +90,32 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
   // Khai báo handler cho Turnstile
   const captchaError = t.captchaError;
   useEffect(() => {
-    (window as any).onTurnstileSuccess = (token: string) => {
-      console.log("Cloudflare Turnstile Token:", token);
-      setTurnstileToken(token);
-      setErrorMessage(prev => prev === captchaError ? '' : prev);
+    const renderCaptcha = () => {
+      if ((window as any).turnstile && turnstileContainerRef.current) {
+        (window as any).turnstile.render(turnstileContainerRef.current, {
+          sitekey: CLOUDFLARE_TURNSTILE_SITE_KEY,
+          theme: 'dark',
+          callback: (token: string) => {
+            setTurnstileToken(token);
+            setErrorMessage(prev => prev === captchaError ? '' : prev);
+          },
+        });
+        setIsCaptchaLoading(false);
+      }
     };
 
+    // Nếu script đã load xong trước đó (vào lại trang)
+    if ((window as any).turnstile) {
+      renderCaptcha();
+    } else {
+      // Nếu script chưa load, gán vào hàm callback toàn cục mà ta sẽ thêm vào URL script
+      (window as any).onTurnstileLoad = renderCaptcha;
+    }
+
     return () => {
-      delete (window as any).onTurnstileSuccess;
+      delete (window as any).onTurnstileLoad;
+      // Lưu ý: Turnstile tự dọn dẹp khi node bị gỡ khỏi DOM, 
+      // nhưng nếu muốn chắc chắn bạn có thể dùng turnstile.remove()
     };
   }, [captchaError]); // Chỉ cần phụ thuộc vào chuỗi captchaError
 
@@ -168,7 +188,7 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
     <div className="min-h-screen bg-background text-foreground font-paragraph selection:bg-primary/30 selection:text-primary">
       <Helmet>
         {/* Script này sẽ chỉ được nạp khi user vào trang Contact */}
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad" async defer></script>
       </Helmet>
 
       <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} data_products={data_products} />
@@ -255,14 +275,23 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
                 />
               </div>
 
-              {/* Cloudflare Turnstile Widget */}
-              <div 
-                className="cf-turnstile" 
-                data-sitekey={CLOUDFLARE_TURNSTILE_SITE_KEY} 
-                data-callback="onTurnstileSuccess"
-                data-appearance="always"
-                data-theme="dark"
-              ></div>
+              {/* Cloudflare Turnstile Widget Container */}
+              <div className="relative min-h-[65px] flex items-center">
+                <AnimatePresence>
+                  {isCaptchaLoading && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 flex items-center gap-3 text-xs font-mono text-primary/60 italic"
+                    >
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {language === 'vi' ? 'Đang thiết lập kết nối bảo mật...' : 'Initializing secure connection...'}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div ref={turnstileContainerRef}></div>
+              </div>
 
               <button
                 disabled={status === 'loading' || !turnstileToken}
