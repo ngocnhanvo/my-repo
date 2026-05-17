@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, Outlet, useParams, useLocation, useNavigate, ScrollRestoration } from 'react-router-dom';
 import ErrorPage from '@/integrations/errorHandlers/ErrorPage'; // Keep ErrorPage
-import HomePage from '@/components/pages/HomePage';
-import PrivacyPage from '@/components/pages/PrivacyPage';
-import TermsPage from '@/components/pages/TermsPage';
-import ContactPage from '@/components/pages/ContactPage';
-import AboutPage from '@/components/pages/AboutPage';
-import ProductListPage from '@/components/pages/ProductListPage';
-import ProductDetailPage from '@/components/pages/ProductDetailPage';
 import { MemberProvider } from '@/integrations';
 import { WPProcessStep, WPComparison, WPInfo } from '@/entities';
 import { HelmetProvider } from 'react-helmet-async';
 import NotFoundPage from './pages/NotFoundPage';
 import { Loader2 } from 'lucide-react';
+
+// Lazy load các trang để giảm kích thước bundle ban đầu
+const HomePage = lazy(() => import('@/components/pages/HomePage'));
+const PrivacyPage = lazy(() => import('@/components/pages/PrivacyPage'));
+const TermsPage = lazy(() => import('@/components/pages/TermsPage'));
+const ContactPage = lazy(() => import('@/components/pages/ContactPage'));
+const AboutPage = lazy(() => import('@/components/pages/AboutPage'));
+const ProductListPage = lazy(() => import('@/components/pages/ProductListPage'));
+const ProductDetailPage = lazy(() => import('@/components/pages/ProductDetailPage'));
 
 interface AppRouterProps {
   data_process_steps: WPProcessStep[];
@@ -169,9 +171,11 @@ export default function AppRouter(props: AppRouterProps) {
 
   return (
     <HelmetProvider>
-    <MemberProvider>
-      <RouterProvider router={router} />
-    </MemberProvider>
+      <MemberProvider>
+        <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <RouterProvider router={router} />
+        </Suspense>
+      </MemberProvider>
     </HelmetProvider>
   );
 }

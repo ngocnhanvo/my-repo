@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Globe, ChevronDown } from 'lucide-react';
 import { WPInfo } from '@/entities';
 import { useLocation, useNavigate } from 'react-router-dom'; // Import useLocation, useNavigate
@@ -16,8 +16,16 @@ interface HeaderProps {
 export default function Header({ language, infoData, prefixWP, setLanguage, data_products }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileSubmenuOpen, setIsMobileSubmenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const location = useLocation(); // Get current location to construct new URLs
   const navigate = useNavigate();
+
+  // Tự động đóng menu khi đường dẫn (pathname) thay đổi
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsMobileSubmenuOpen(false);
+    setActiveDropdown(null);
+  }, [location.pathname, location.search]); // Theo dõi pathname để đóng menu ngay khi đổi trang
 
   const content = {
     vi: {
@@ -74,21 +82,30 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
   ];
 
   const handleNavClick = (href: string) => {
-    setIsMenuOpen(false);
+    setActiveDropdown(null);
     const targetId = href.replace('#', '');
     const isHomePage = location.pathname === `/${language}` || location.pathname === `/${language}/`;
     
     if (href.startsWith('#')) { // Đây là một liên kết neo (anchor)
       if (isHomePage) { // Nếu đang ở trang chủ, cuộn đến vị trí
+        setIsMenuOpen(false);
+        setIsMobileSubmenuOpen(false);
         const element = document.getElementById(targetId);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
         }
       } else { // Nếu không ở trang chủ, điều hướng về trang chủ và cuộn
+        // Khi về trang chủ từ trang khác, useEffect [location.pathname] sẽ lo việc đóng menu
         navigate(`/${language}`, { state: { scrollTo: targetId }, preventScrollReset: true });
       }
     } else { // Đây là một đường dẫn trang (ví dụ: /contact)
-      navigate(`/${language}${href}`);
+      // Đảm bảo đóng menu TRƯỚC khi thực hiện điều hướng để tránh lag giao diện
+      setIsMenuOpen(false);
+      setIsMobileSubmenuOpen(false);
+      
+      const targetPath = `/${language}${href.startsWith('/') ? href : `/${href}`}`;
+      navigate(targetPath);
+      window.scrollTo(0, 0); // Đảm bảo cuộn lên đầu trang mới
     }
   };
 
@@ -128,7 +145,12 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
             {navItems.map((item, index) => (
-              <div key={item.href} className="relative group">
+              <div 
+                key={item.href} 
+                className="relative group"
+                onMouseEnter={() => item.children && setActiveDropdown(item.href)}
+                onMouseLeave={() => setActiveDropdown(null)}
+              >
                 <motion.button
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -139,7 +161,11 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
                   }`}
                 >
                   {item.label}
-                  {item.children && <ChevronDown className="w-4 h-4 opacity-50 group-hover:rotate-180 transition-transform" />}
+                  {item.children && (
+                    <ChevronDown className={`w-4 h-4 opacity-50 transition-transform ${
+                      activeDropdown === item.href ? 'rotate-180' : ''
+                    }`} />
+                  )}
                   {isActive(item.href) && (
                     <motion.div
                       layoutId="activeUnderline"
@@ -150,7 +176,11 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
 
                 {/* Desktop Dropdown */}
                 {item.children && (
-                  <div className="absolute top-full left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                  <div className={`absolute top-full left-0 pt-4 transition-all duration-300 ${
+                    activeDropdown === item.href 
+                      ? "opacity-100 visible translate-y-0" 
+                      : "opacity-0 invisible translate-y-2"
+                  }`}>
                     <div className="bg-[#0a0a0a] border border-primary/20 min-w-[240px] p-2 flex flex-col shadow-2xl shadow-primary/20">
                       {item.children.map((subItem) => (
                         <button
@@ -209,51 +239,53 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <motion.nav
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden mt-4 pb-4 border-t border-primary/20 pt-4"
-          >
-            <div className="flex flex-col gap-4">
-              {navItems.map((item) => (
-                <div key={item.href} className="flex flex-col">
-                  <div className="flex items-center justify-between">
-                    <button
-                      onClick={() => handleNavClick(item.href)}
-                      className={`transition-colors font-medium text-left py-2 border-l-4 pl-3 flex-1 ${
-                        isActive(item.href) ? "text-primary border-primary bg-primary/5" : "text-foreground/80 border-transparent"
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                    {item.children && (
-                      <button 
-                        onClick={() => setIsMobileSubmenuOpen(!isMobileSubmenuOpen)}
-                        className="p-2 text-foreground/50"
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.nav
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden mt-4 pb-4 border-t border-primary/20 pt-4 overflow-hidden"
+            >
+              <div className="flex flex-col gap-4">
+                {navItems.map((item) => (
+                  <div key={item.href} className="flex flex-col">
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={() => handleNavClick(item.href)}
+                        className={`transition-colors font-medium text-left py-2 border-l-4 pl-3 flex-1 ${
+                          isActive(item.href) ? "text-primary border-primary bg-primary/5" : "text-foreground/80 border-transparent"
+                        }`}
                       >
-                        <ChevronDown className={`w-5 h-5 transition-transform ${isMobileSubmenuOpen ? 'rotate-180' : ''}`} />
+                        {item.label}
                       </button>
+                      {item.children && (
+                        <button 
+                          onClick={() => setIsMobileSubmenuOpen(!isMobileSubmenuOpen)}
+                          className="p-2 text-foreground/50"
+                        >
+                          <ChevronDown className={`w-5 h-5 transition-transform ${isMobileSubmenuOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                      )}
+                    </div>
+                    {item.children && isMobileSubmenuOpen && (
+                      <div className="flex flex-col ml-4 mt-2 border-l border-white/10">
+                        {item.children.map((subItem) => (
+                          <button
+                            key={subItem.href}
+                            onClick={() => handleNavClick(subItem.href)}
+                            className="text-left px-6 py-3 text-sm text-foreground/60 font-mono"
+                            dangerouslySetInnerHTML={{ __html: subItem.label }}
+                          />
+                        ))}
+                      </div>
                     )}
                   </div>
-                  {item.children && isMobileSubmenuOpen && (
-                    <div className="flex flex-col ml-4 mt-2 border-l border-white/10">
-                      {item.children.map((subItem) => (
-                        <button
-                          key={subItem.href}
-                          onClick={() => handleNavClick(subItem.href)}
-                          className="text-left px-6 py-3 text-sm text-foreground/60 font-mono"
-                          dangerouslySetInnerHTML={{ __html: subItem.label }}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </motion.nav>
-        )}
+                ))}
+              </div>
+            </motion.nav>
+          )}
+        </AnimatePresence>
       </div>
     </header>
   );
