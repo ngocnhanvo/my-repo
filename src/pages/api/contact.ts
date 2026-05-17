@@ -5,12 +5,32 @@ export const prerender = false;
 export const POST: APIRoute = async ({ request }) => { // Keep POST export
   try {
     const body = await request.json();
-    const { name, phone, email, message, toEmail, companyName, domain } = body;
+    const { turnstileToken, name, phone, email, message, toEmail, companyName, domain } = body;
 
     // Bạn cần cài đặt biến môi trường RESEND_API_KEY trên Cloudflare Dashboard
     const RESEND_API_KEY = import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY;
+    const TURNSTILE_SECRET_KEY = import.meta.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
     const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
     const WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
+
+    // 1. Xác thực Cloudflare Turnstile trước khi làm bất cứ việc gì khác
+    if (TURNSTILE_SECRET_KEY) {
+      const verifyResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          secret: TURNSTILE_SECRET_KEY,
+          response: turnstileToken,
+        }),
+      });
+
+      const verifyData = await verifyResponse.json();
+      if (!verifyData.success) {
+        console.warn('⚠️ Cảnh báo: Phát hiện yêu cầu spam hoặc Captcha không hợp lệ.');
+        return new Response(JSON.stringify({ error: 'Security verification failed' }), { status: 403 });
+      }
+    }
+
     const recipient = toEmail || "contact@vibecodestudio.com"; // Ưu tiên email từ client, fallback nếu cần
     const fromEmail = `Trợ lý NVN<troly@${domain}>`; // Định dạng email người gửi
 
@@ -29,13 +49,13 @@ export const POST: APIRoute = async ({ request }) => { // Keep POST export
         from: fromEmail, // Sử dụng email người gửi đã định dạng
         to: recipient,
         cc: email ? [email] : undefined,
-        subject: `[${companyName || 'Vibe Code'}] Yêu cầu từ khách hàng: ${name}`,
+        subject: `[${companyName || 'Vibe Code'}] Yêu cầu từ khách hàng "${name}"`,
         html: `
-          <h3>Thông tin liên hệ mới</h3>
+          <h3>Thông tin liên hệ của khách hàng</h3>
           <p><strong>Họ tên:</strong> ${name}</p>
           <p><strong>Số điện thoại:</strong> ${phone}</p>
           ${email ? `<p><strong>Email khách hàng:</strong> ${email}</p>` : ''}
-          <p><strong>Nội dung:</strong></p>
+          <p><strong>Nội dung tin nhắn:</strong></p>
           <p>${message.replace(/\n/g, '<br />')}</p>
         `,
       }),

@@ -5,7 +5,9 @@ import { WPInfo, WPProcessStep, WPComparison } from '@/entities';
 import { useOutletContext, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Phone, User, MessageSquare, Loader2, CheckCircle2, Home, ArrowRight, Mail } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
+const CLOUDFLARE_TURNSTILE_SITE_KEY = (import.meta.env?.PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY || "") as string;
 interface ContactPageProps {
   data_process_steps: WPProcessStep[];
   data_compre: WPComparison[];
@@ -26,8 +28,44 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
   const infoData = data_info[0] || { id: 0 };
   const prefixWP = language === 'en' ? 'en_' : '';
 
+  const t = {
+    vi: {
+      title: 'Liên Hệ Với Chúng Tôi',
+      subtitle: 'Gửi yêu cầu khởi động dự án của bạn ngay hôm nay',
+      name: 'Họ và tên',
+      phone: 'Số điện thoại',
+      email: 'Email (Không bắt buộc)',
+      message: 'Nội dung tin nhắn',
+      send: 'Gửi Tín Hiệu',
+      sending: 'Đang truyền dữ liệu...',
+      success: 'Đã gửi thành công! Chúng tôi sẽ liên hệ lại sớm.',
+      error: 'Có lỗi xảy ra. Vui lòng thử lại sau.',
+      invalidPhone: 'Số điện thoại không hợp lệ (Ví dụ: 0912 345 678)',
+      namePlaceholder: 'Ví dụ: Nguyễn Văn A',
+      captchaError: 'Vui lòng xác thực bảo mật',
+      messagePlaceholder: 'Ví dụ: Tôi cần tư vấn về giải pháp thiết kế website doanh nghiệp...'
+    },
+    en: {
+      title: 'Contact Us',
+      subtitle: 'Send your request to initialize your project today',
+      name: 'Full Name',
+      phone: 'Phone Number',
+      email: 'Email (Optional)',
+      message: 'Message Content',
+      send: 'Transmit Signal',
+      sending: 'Transmitting...',
+      success: 'Sent successfully! We will contact you soon.',
+      error: 'An error occurred. Please try again later.',
+      invalidPhone: 'Invalid phone number (Example: 0912 345 678)',
+      namePlaceholder: 'e.g. John Doe',
+      captchaError: 'Please verify security',
+      messagePlaceholder: 'e.g. I would like to consult about business website solutions...'
+    }
+  }[language];
+
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', message: '' });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [countdown, setCountdown] = useState(5);
 
@@ -42,10 +80,24 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
     const state = location.state as { prefillMessage?: string };
     if (state?.prefillMessage) {
       setFormData(prev => ({ ...prev, message: state.prefillMessage }));
-      // Xóa state sau khi đã điền để tránh việc load lại trang vẫn giữ tin nhắn cũ
-      window.history.replaceState({}, document.title);
+      // Sử dụng navigate để xóa state trong React Router, giúp dừng vòng lặp vô hạn
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state]);
+  }, [location.state, navigate, location.pathname]);
+
+  // Khai báo handler cho Turnstile
+  const captchaError = t.captchaError;
+  useEffect(() => {
+    (window as any).onTurnstileSuccess = (token: string) => {
+      console.log("Cloudflare Turnstile Token:", token);
+      setTurnstileToken(token);
+      setErrorMessage(prev => prev === captchaError ? '' : prev);
+    };
+
+    return () => {
+      delete (window as any).onTurnstileSuccess;
+    };
+  }, [captchaError]); // Chỉ cần phụ thuộc vào chuỗi captchaError
 
   useEffect(() => {
     let timer: any;
@@ -63,44 +115,17 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
     return () => clearInterval(timer);
   }, [status, navigate, language]);
 
-  const t = {
-    vi: {
-      title: 'Liên Hệ Với Chúng Tôi',
-      subtitle: 'Gửi yêu cầu khởi động dự án của bạn ngay hôm nay',
-      name: 'Họ và tên',
-      phone: 'Số điện thoại',
-      email: 'Email (Không bắt buộc)',
-      message: 'Nội dung tin nhắn',
-      send: 'Gửi Tín Hiệu',
-      sending: 'Đang truyền dữ liệu...',
-      success: 'Đã gửi thành công! Chúng tôi sẽ liên hệ lại sớm.',
-      error: 'Có lỗi xảy ra. Vui lòng thử lại sau.',
-      invalidPhone: 'Số điện thoại không hợp lệ (Ví dụ: 0912 345 678)',
-      namePlaceholder: 'Ví dụ: Nguyễn Văn A',
-      messagePlaceholder: 'Ví dụ: Tôi cần tư vấn về giải pháp thiết kế website doanh nghiệp...'
-    },
-    en: {
-      title: 'Contact Us',
-      subtitle: 'Send your request to initialize your project today',
-      name: 'Full Name',
-      phone: 'Phone Number',
-      email: 'Email (Optional)',
-      message: 'Message Content',
-      send: 'Transmit Signal',
-      sending: 'Transmitting...',
-      success: 'Sent successfully! We will contact you soon.',
-      error: 'An error occurred. Please try again later.',
-      invalidPhone: 'Invalid phone number (Example: 0912 345 678)',
-      namePlaceholder: 'e.g. John Doe',
-      messagePlaceholder: 'e.g. I would like to consult about business website solutions...'
-    }
-  }[language];
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validatePhone(formData.phone)) {
       setErrorMessage(t.invalidPhone);
+      setStatus('error');
+      return;
+    }
+
+    if (!turnstileToken) {
+      setErrorMessage(t.captchaError);
       setStatus('error');
       return;
     }
@@ -113,6 +138,7 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           ...formData, 
+          turnstileToken, // Gửi token lên server để verify
           toEmail: infoData.email,
           domain: infoData.domain, // Gửi domain để API có thể sử dụng trong email người gửi
           companyName: infoData[`${prefixWP}tencongty`]
@@ -122,18 +148,29 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
       if (response.ok) {
         setStatus('success');
         setFormData({ name: '', phone: '', email: '', message: '' });
+        setTurnstileToken(null);
       } else {
         setErrorMessage(t.error);
         setStatus('error');
+        // Reset Turnstile nếu gửi lỗi
+        if ((window as any).turnstile) (window as any).turnstile.reset();
+        setTurnstileToken(null);
       }
     } catch (error) {
       setErrorMessage(t.error);
       setStatus('error');
+      if ((window as any).turnstile) (window as any).turnstile.reset();
+      setTurnstileToken(null);
     }
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground font-paragraph selection:bg-primary/30 selection:text-primary">
+      <Helmet>
+        {/* Script này sẽ chỉ được nạp khi user vào trang Contact */}
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+      </Helmet>
+
       <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} data_products={data_products} />
       
       <main className="pt-40 pb-20">
@@ -218,8 +255,17 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
                 />
               </div>
 
+              {/* Cloudflare Turnstile Widget */}
+              <div 
+                className="cf-turnstile" 
+                data-sitekey={CLOUDFLARE_TURNSTILE_SITE_KEY} 
+                data-callback="onTurnstileSuccess"
+                data-appearance="always"
+                data-theme="dark"
+              ></div>
+
               <button
-                disabled={status === 'loading'}
+                disabled={status === 'loading' || !turnstileToken}
                 type="submit"
                 className="w-full clip-edge bg-primary text-primary-foreground font-bold py-6 flex items-center justify-center gap-3 hover:bg-primary/90 transition-all disabled:opacity-50"
               >
