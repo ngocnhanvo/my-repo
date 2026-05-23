@@ -11,6 +11,7 @@ import { getPrivacyPage } from '@/lib/wordpress/chinhsachbaomat';
 import { getTermsPage } from '@/lib/wordpress/chinhsachdichvu';
 import { getAboutPage } from '@/lib/wordpress/gioithieu';
 import { getProducts } from '@/lib/wordpress/sanpham';
+import { getTemplates } from '@/lib/wordpress/template';
 import { stripHtmlAndUnescape } from '@/lib/stringUtils';
 
 let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
@@ -23,10 +24,11 @@ const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 const data_process_steps = await getProcessSteps(undefined, true); // Đang ở chế độ preview
 const data_compre = await getCompre();
 const data_info = await getInfo(true); // Đang ở chế độ preview
-const data_privacy = await getPrivacyPage(data_info[0] || {});
-const data_terms = await getTermsPage(data_info[0] || {});
-const data_about_me = await getAboutPage(data_info[0] || {});
+const data_privacy = await getPrivacyPage(data_info[0]);
+const data_terms = await getTermsPage(data_info[0]);
+const data_about_me = await getAboutPage(data_info[0]);
 const data_products = await getProducts(undefined, true); // Đang ở chế độ preview
+const data_templates = await getTemplates(undefined, true);
 
   const companyName = data_info[0]?.['tencongty'] || 'Vibe Code Studio';
   
@@ -134,6 +136,22 @@ const data_products = await getProducts(undefined, true); // Đang ở chế đ�
       ogImage: product.image || `${WC_URL}/wp-content/uploads/og-image.jpg` 
     });
   });
+
+  data_templates.forEach((template) => {
+    pages.push({
+      slug: `vi/templates/${template.id}`,
+      title: `${template.title['vi']} - ${companyName}`,
+      description: stripHtmlAndUnescape(template.content['vi']) || '',
+      ogImage: template.image[lang].src || `${WC_URL}/wp-content/uploads/og-image.jpg` 
+    });
+
+    pages.push({
+      slug: `en/templates/${template.id}`,
+      title: `${template.title['en']} - ${companyName}`,
+      description: stripHtmlAndUnescape(template.content['en']) || '',
+      ogImage: template.image[lang].src || `${WC_URL}/wp-content/uploads/og-image.jpg` 
+    });
+  });
   
 // Tìm thông tin SEO của trang hiện tại từ danh sách pages
 const currentPageData = pages.find(p => p.slug === slug) || pages[0];
@@ -160,7 +178,7 @@ const currentPageUrl = new URL(Astro.url.pathname, siteOrigin).href;
     <link rel="canonical" href={currentPageUrl} />
     <link
         rel="icon"
-        href={data_info[0]?.['favicon'] || '/favicon.ico'}
+        href={data_info[0]?.favicon.srcSets["20"] || '/favicon.ico'}
     />
 
     <!-- Open Graph (Facebook, Zalo, LinkedIn) -->
@@ -205,7 +223,7 @@ const currentPageUrl = new URL(Astro.url.pathname, siteOrigin).href;
     <div style="display:none">Build ID: {Date.now()}</div>
     <div id="root" class="w-full h-full">
         <AppRouter
-          client:load
+          client:only="react"
           data_process_steps={data_process_steps}
           data_compre={data_compre}
           data_info={data_info}
@@ -213,6 +231,7 @@ const currentPageUrl = new URL(Astro.url.pathname, siteOrigin).href;
           data_terms={data_terms}
           data_about_me={data_about_me}
           data_products={data_products}
+          data_templates={data_templates}
           WC_URL={WC_URL || ''}
           basename="/preview"
         />

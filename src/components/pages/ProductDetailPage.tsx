@@ -1,4 +1,3 @@
-import React from 'react';
 import { useParams, useOutletContext, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -7,10 +6,11 @@ import { resolvePlaceholders, formatCurrency } from '@/lib/stringUtils';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { WPProduct } from '@/entities/wordpress';
 
 interface ProductDetailPageProps {
   data_info: WPInfo[];
-  data_products?: any[];
+  data_products?: WPProduct[];
 }
 
 export default function ProductDetailPage({ data_info, data_products = [] }: ProductDetailPageProps) {

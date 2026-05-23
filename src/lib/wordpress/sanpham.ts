@@ -1,7 +1,8 @@
+import { WPProduct } from '@/entities/wordpress';
 import { processAndStoreImage } from './imageProcessor';
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
-export async function getProducts(status: string = 'publish', isPreview: boolean = false) {
+export async function getProducts(status: string = 'publish', isPreview: boolean = false): Promise<WPProduct[]>{
   if (!WC_URL) {
     throw new Error('❌ LỖI: Biến WC_URL chưa được cấu hình. Không thể fetch sản phẩm.');
   }
@@ -9,7 +10,7 @@ export async function getProducts(status: string = 'publish', isPreview: boolean
   try {
     // Fetch danh sách sản phẩm (Custom Post Type: product)
     // Sử dụng _embed để lấy thêm ảnh đại diện (featured media)
-    const response = await fetch(`${WC_URL}/wp-json/wp/v2/product?_embed=true&per_page=100&orderby=menu_order&order=asc&status=${status}`);
+    const response = await fetch(`${WC_URL}/wp-json/wp/v2/product?_embed=true&per_page=100&orderby=menu_order&order=asc&product_cat_slug=website&status=${status}`);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -25,7 +26,6 @@ export async function getProducts(status: string = 'publish', isPreview: boolean
       const isEn = item.slug.startsWith('en_');
       const baseSlug = isEn ? item.slug.replace('en_', '') : item.slug;
       const featuredImage = item._embedded?.['wp:featuredmedia']?.[0]?.source_url || '';
-
       if (!unifiedProducts[baseSlug]) {
         unifiedProducts[baseSlug] = {
           id: item.id,
@@ -62,7 +62,7 @@ export async function getProducts(status: string = 'publish', isPreview: boolean
     });
 
     // Xử lý lưu ảnh static cho tất cả sản phẩm đã gom nhóm
-    return await Promise.all(Object.values(unifiedProducts).map(async (p: any) => {
+    return await Promise.all(Object.values(unifiedProducts).map(async (p: any): Promise<WPProduct> => {
       if (p.image) {
         p.image = await processAndStoreImage({
           imageUrl: p.image,

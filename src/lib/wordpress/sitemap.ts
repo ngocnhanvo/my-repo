@@ -3,7 +3,7 @@
  * Hàm này nên được gọi trong quá trình build (ví dụ: trong file trang chủ hoặc script build)
  */
 export async function generateAndSaveSitemap(
-  allPages: Array<{ slug?: string; title: string; description: string; ogImage: string; }>,
+  allPages: Array<{ slug?: string; title: string; description: string; ogImage?: string; }>,
   infoData: any // Assuming infoData[0] is passed here
 ): Promise<{ sitemap: string | null; robots: string | null }> {
   // Chỉ chạy ở phía Server

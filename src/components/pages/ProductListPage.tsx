@@ -6,10 +6,11 @@ import { useOutletContext, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Package } from 'lucide-react';
 import { resolvePlaceholders, formatCurrency, getWebpPath } from '@/lib/stringUtils';
+import { WPProduct } from '@/entities/wordpress';
 
 interface ProductListPageProps {
   data_info: WPInfo[];
-  data_products?: any[];
+  data_products?: WPProduct[];
 }
 
 export default function ProductListPage({ data_info, data_products = [] }: ProductListPageProps) {
@@ -59,9 +60,9 @@ export default function ProductListPage({ data_info, data_products = [] }: Produ
                   <div className="aspect-video relative overflow-hidden bg-white/5">
                     {product.image ? (
                       <picture>
-                        <source srcSet={getWebpPath(product.image)} type="image/webp" />
+                        <source srcSet={product.image.srcSet} sizes="(max-width: 600px) 400px, (max-width: 1200px) 800px, 1200px" type="image/webp" />
                         <img 
-                          src={product.image} 
+                          src={product.image.src} 
                           alt={title} 
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />

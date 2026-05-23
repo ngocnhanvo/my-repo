@@ -52,6 +52,16 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
     return `/${language}${pathWithoutLang.split('#')[0]}${anchorId}`;
   };
 
+  // Hàm xử lý chung cho các link trang (About, Contact, Privacy...)
+  const handlePageLink = (e: React.MouseEvent, path: string) => {
+    e.preventDefault();
+    window.dispatchEvent(new Event('app:nav-start'));
+    setTimeout(() => {
+      navigate(path);
+      //window.scrollTo(0, 0);
+    }, 0);
+  };
+
   const handleNavClick = (anchorId: string) => {
     const isHomePage = location.pathname === `/${language}` || location.pathname === `/${language}/`;
     
@@ -61,7 +71,10 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     } else {
-      navigate(`/${language}`, { state: { scrollTo: anchorId.replace('#', '') }, preventScrollReset: true });
+      window.dispatchEvent(new Event('app:nav-start'));
+      setTimeout(() => {
+        navigate(`/${language}`, { state: { scrollTo: anchorId.replace('#', '') }, preventScrollReset: true });
+      }, 0);
     }
   };
 
@@ -81,9 +94,13 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
                 {infoData.logo ? (
                   <picture>
-                  <source srcSet={getWebpPath(infoData.logo)} type="image/webp" />
+                  <source 
+                    srcSet={infoData.logo.srcSet} 
+                    type="image/webp" 
+                    sizes="(max-width: 600px) 30px, (max-width: 1200px) 30px, 30px"  
+                  />
                   <img 
-                    src={infoData.logo} 
+                    src={infoData.logo.src} 
                     alt={infoData[`${prefixWP}tencongty`] || 'Logo'} 
                     className="w-full h-full object-contain p-1.5"
                     width="48"
@@ -164,25 +181,38 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
             <h4 className="font-heading text-lg font-bold text-foreground">{t.links.about}</h4>
             <ul className="space-y-2">
               <li>
-                <Link to={`/${language}/about`} className="text-foreground/70 hover:text-primary transition-colors text-sm">
+                <Link 
+                  to={`/${language}/about`} 
+                  onClick={(e) => handlePageLink(e, `/${language}/about`)}
+                  className="text-foreground/70 hover:text-primary transition-colors text-sm"
+                >
                   {t.links.about}
                 </Link>
               </li>
               <li>
                 <Link
                   to={`/${language}/contact`}
+                  onClick={(e) => handlePageLink(e, `/${language}/contact`)}
                   className="text-foreground/70 hover:text-primary transition-colors text-sm"
                 >
                   {t.links.contact}
                 </Link>
               </li>
               <li>
-                <Link to={`/${language}/privacy`} className="text-foreground/70 hover:text-primary transition-colors text-sm">
+                <Link 
+                  to={`/${language}/privacy`} 
+                  onClick={(e) => handlePageLink(e, `/${language}/privacy`)}
+                  className="text-foreground/70 hover:text-primary transition-colors text-sm"
+                >
                   {t.links.privacy}
                 </Link>
               </li>
               <li>
-                <Link to={`/${language}/terms`} className="text-foreground/70 hover:text-primary transition-colors text-sm">
+                <Link 
+                  to={`/${language}/terms`} 
+                  onClick={(e) => handlePageLink(e, `/${language}/terms`)}
+                  className="text-foreground/70 hover:text-primary transition-colors text-sm"
+                >
                   {t.links.terms}
                 </Link>
               </li>
@@ -228,10 +258,18 @@ export default function Footer({ language, infoData, prefixWP }: FooterProps) {
               {t.copyright}
             </p>
             <div className="flex items-center gap-6">
-              <Link to={`/${language}/privacy`} className="text-foreground/60 hover:text-primary transition-colors text-sm">
+              <Link 
+                to={`/${language}/privacy`} 
+                onClick={(e) => handlePageLink(e, `/${language}/privacy`)}
+                className="text-foreground/60 hover:text-primary transition-colors text-sm"
+              >
                 {t.links.privacy}
               </Link>
-              <Link to={`/${language}/terms`} className="text-foreground/60 hover:text-primary transition-colors text-sm">
+              <Link 
+                to={`/${language}/terms`} 
+                onClick={(e) => handlePageLink(e, `/${language}/terms`)}
+                className="text-foreground/60 hover:text-primary transition-colors text-sm"
+              >
                 {t.links.terms}
               </Link>
             </div>

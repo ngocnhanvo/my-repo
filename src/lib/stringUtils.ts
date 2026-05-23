@@ -3,14 +3,18 @@
  */
 import he from 'he';
 export const escapeHtml = (unsafe: string): string => {
-  if (!unsafe) return '';
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  const strippedHtml = unsafe.replace(/<\/?[^>]+(>|$)/g, "");
+  const cleanText = he.decode(strippedHtml);
+  return cleanText;
 };
+
+export const removeUnicode = (decodedStr: string) => {
+  return decodedStr
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D");
+}
 
 export const getWebpPath = (url: string) => {
   if (!url) return "";
@@ -53,10 +57,11 @@ export const resolvePlaceholders = (text: string, data: any): string => {
  * @param amount Số tiền cần định dạng.
  * @returns Chuỗi tiền tệ đã định dạng (ví dụ: "1.000.000 VNĐ").
  */
-export const formatCurrency = (amount: number | string): string => {
+export const formatCurrency = (amount: number | string, currency: string = 'VND'): string => {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
   if (isNaN(num)) {
     return ''; // Trả về chuỗi rỗng nếu không phải là số hợp lệ
   }
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
+  currency = removeUnicode(currency);
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: currency }).format(num);
 };

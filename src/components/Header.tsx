@@ -33,6 +33,7 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
         home: 'Trang Chủ',
         about: 'Giới Thiệu',
         products: 'Sản Phẩm',
+        templates: 'Mẫu Website',
         contact: 'Liên Hệ'
       },
       toggleMenu: 'Mở/Đóng menu'
@@ -42,6 +43,7 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
         home: 'Home',
         about: 'About',
         products: 'Products',
+        templates: 'Templates',
         contact: 'Contact'
       },
       toggleMenu: 'Toggle menu'
@@ -53,22 +55,15 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
   // Hàm kiểm tra trạng thái active của menu
   const isActive = (href: string) => {
     const isHomePage = location.pathname === `/${language}` || location.pathname === `/${language}/`;
-    if (href.startsWith('#')) {
+    if (href == '/') {
       return isHomePage; // Các link neo (#hero) chỉ active khi ở trang chủ
     }
     // Với các trang khác, kiểm tra xem pathname có bắt đầu bằng đường dẫn menu không (hỗ trợ trang con /products/slug)
     return location.pathname.startsWith(`/${language}${href}`);
   };
 
-  // Function to generate language-prefixed URLs
-  const getLocalizedHref = (href: string) => {
-    // Remove existing language prefix if any, then add the current one
-    const pathWithoutLang = location.pathname.replace(/^\/(vi|en)/, '');
-    return `/${language}${pathWithoutLang.startsWith('/') ? '' : '/'}${href}`;
-  };
-
   const navItems = [
-    { label: t.nav.home, href: '#hero' },
+    { label: t.nav.home, href: '/' },
     { label: t.nav.about, href: '/about' },
     { 
       label: t.nav.products, 
@@ -78,6 +73,7 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
         href: `/products/${p.baseSlug || p.slug}`
       }))
     },
+    { label: t.nav.templates, href: '/templates' },
     { label: t.nav.contact, href: '/contact' } // Thay đổi để dẫn đến trang /contact
   ];
 
@@ -102,10 +98,16 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
       // Đảm bảo đóng menu TRƯỚC khi thực hiện điều hướng để tránh lag giao diện
       setIsMenuOpen(false);
       setIsMobileSubmenuOpen(false);
-      
       const targetPath = `/${language}${href.startsWith('/') ? href : `/${href}`}`;
-      navigate(targetPath);
-      window.scrollTo(0, 0); // Đảm bảo cuộn lên đầu trang mới
+      
+      window.dispatchEvent(new Event('app:nav-start'));
+
+      // Sử dụng setTimeout 0 để tách biệt việc đóng menu (UI update) và chuyển trang (Heavy task)
+      // Giúp trình duyệt phản hồi click ngay lập tức mà không bị "khựng" do tranh chấp tài nguyên
+      setTimeout(() => {  
+        navigate(targetPath);
+        //window.scrollTo(0, 0);
+      }, 0);
     }
   };
 
@@ -124,9 +126,13 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center overflow-hidden">
               {infoData.logo ? (
                 <picture>
-                <source srcSet={getWebpPath(infoData.logo)} type="image/webp" />
+                <source 
+                  srcSet={infoData.logo.srcSet} 
+                  sizes="(max-width: 600px) 30px, (max-width: 1200px) 30px, 30px"
+                  type="image/webp" 
+                />
                 <img 
-                  src={infoData.logo} 
+                  src={infoData.logo.src} 
                   alt={infoData[`${prefixWP}tencongty`] || 'Logo'} 
                   className="w-full h-full object-contain p-1.5"
                   width="40"

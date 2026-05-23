@@ -1,8 +1,9 @@
+import { WPProcessStep } from '@/entities';
 import { processAndStoreImage } from './imageProcessor'; // Import the new utility function
 
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
-export async function getProcessSteps(status: string = 'publish', isPreview: boolean = false) {
+export async function getProcessSteps(status: string = 'publish', isPreview: boolean = false): Promise<WPProcessStep[]>{
   if (!WC_URL) {
     console.error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables.');
     return [];
@@ -22,7 +23,7 @@ export async function getProcessSteps(status: string = 'publish', isPreview: boo
     return []; 
   }
 
-  return await Promise.all(raw_data.map(async (step: any) => {
+  return await Promise.all(raw_data.map(async (step: any): Promise<WPProcessStep> => {
     const absoluteImageUrl = step.acf.image?.url || '';
     
     const finalImageUrl = await processAndStoreImage({

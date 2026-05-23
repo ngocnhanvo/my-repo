@@ -1,8 +1,9 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense, useLayoutEffect, useRef } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, Outlet, useParams, useLocation, useNavigate, ScrollRestoration } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import ErrorPage from '@/integrations/errorHandlers/ErrorPage'; // Keep ErrorPage
 import { MemberProvider } from '@/integrations';
-import { WPProcessStep, WPComparison, WPInfo } from '@/entities';
+import { WPProcessStep, WPComparison, WPInfo, WPTemplate } from '@/entities';
 import { HelmetProvider } from 'react-helmet-async';
 import NotFoundPage from './pages/NotFoundPage';
 import { Loader2 } from 'lucide-react';
@@ -15,6 +16,8 @@ const ContactPage = lazy(() => import('@/components/pages/ContactPage'));
 const AboutPage = lazy(() => import('@/components/pages/AboutPage'));
 const ProductListPage = lazy(() => import('@/components/pages/ProductListPage'));
 const ProductDetailPage = lazy(() => import('@/components/pages/ProductDetailPage'));
+const TemplatePage = lazy(() => import('@/components/pages/TemplatePage'));
+const TemplateDetailPage = lazy(() => import('@/components/pages/TemplateDetailPage'));
 
 interface AppRouterProps {
   data_process_steps: WPProcessStep[];
@@ -25,8 +28,32 @@ interface AppRouterProps {
   data_terms?: any;
   data_about_me?: any;
   data_products?: any[];
+  data_templates?: WPTemplate[];
   basename?: string; // Thêm prop này để kiểm soát URL gốc
 }
+
+// Hiệu ứng loading trang chuyên nghiệp hơn
+const PageLoader = () => (
+  <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6">
+    <div className="relative">
+      <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      <div className="absolute inset-0 blur-xl bg-primary/30 animate-pulse rounded-full" />
+    </div>
+    <div className="flex flex-col items-center gap-2">
+      <span className="font-mono text-[10px] tracking-[0.3em] text-primary/70 uppercase animate-pulse">
+        Synchronizing Data...
+      </span>
+      <div className="w-32 h-[1px] bg-white/10 relative overflow-hidden">
+        <motion.div 
+          className="absolute inset-0 bg-primary"
+          initial={{ x: "-100%" }}
+          animate={{ x: "100%" }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+        />
+      </div>
+    </div>
+  </div>
+);
 
 // Layout component that includes ScrollToTop
 function LayoutWithLanguage() {
@@ -48,10 +75,17 @@ function LayoutWithLanguage() {
     navigate(`/${pathSegments.join('/')}${location.search}${location.hash}`, { preventScrollReset: true });
   };
 
+  // Kết thúc hiệu ứng loading khi đã chuyển trang thành công
+  useEffect(() => {
+    window.dispatchEvent(new Event('app:nav-end'));
+  }, [location.pathname]);
+
   return (
     <>
       <ScrollRestoration />
-      <Outlet context={{ language: currentLang, setLanguage }} /> {/* Pass language and setLanguage via context */}
+      <Suspense fallback={<PageLoader />}>
+        <Outlet context={{ language: currentLang, setLanguage }} />
+      </Suspense>
     </>
   );
 }
@@ -135,6 +169,22 @@ const getRouterConfig = (props: AppRouterProps) => ([
         ),
       },
       {
+        path: ":lang/templates",
+        element: (
+          <LanguageGuard {...props}>
+            <TemplatePage {...props} />
+          </LanguageGuard>
+        ),
+      },
+      {
+        path: ":lang/templates/:id",
+        element: (
+          <LanguageGuard {...props}>
+            <TemplateDetailPage {...props} />
+          </LanguageGuard>
+        ),
+      },
+      {
         path: ":lang/*", 
         element: <NotFoundPage {...props} />,
       },
@@ -159,22 +209,14 @@ export default function AppRouter(props: AppRouterProps) {
 
   if (!router) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <div className="relative">
-          <Loader2 className="w-10 h-10 text-primary animate-spin" />
-          <div className="absolute inset-0 blur-lg bg-primary/20 animate-pulse rounded-full" />
-        </div>
-        <span className="font-mono text-[10px] tracking-[0.2em] text-primary/60 uppercase">Initializing System...</span>
-      </div>
+      <PageLoader />
     );
   }
 
   return (
     <HelmetProvider>
       <MemberProvider>
-        <Suspense fallback={<div className="min-h-screen bg-background" />}>
-          <RouterProvider router={router} />
-        </Suspense>
+        <RouterProvider router={router} />
       </MemberProvider>
     </HelmetProvider>
   );

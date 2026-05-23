@@ -1,19 +1,48 @@
 // Ví dụ nội dung file src/entities/wordpress.ts
+export interface ProcessedImageResult {
+  src: string;     // Đường dẫn ảnh mặc định (bản lớn nhất hoặc ảnh gốc)
+  srcSet: string;
+  srcSets: {};   // Chuỗi srcSet chứa nhiều kích thước phục vụ responsive
+}
+
 export interface WPProduct {
   id: number;
   name: string;
   slug?: string;
   price?: string;
-  description?: string;
-  image?: string;
+  image?: ProcessedImageResult;
   images?: Array<{ src: string; alt: string }>;
+  baseSlug?: string;
+  title?: string;
+  content?: string;
+  description?: string;
+  en_title?: string;
+  en_content?: string;
+  en_description?: string;
   // ... các trường khác từ WooCommerce API
   category?: string;
   categoryId?: string;
   categoryImage: string;
   attributes?: { name: string; value: string }[];
-  material?: string;
   dimensions?: string;
+}
+
+/** Giao diện Mẫu Website */
+export interface WPTemplate {
+  id?: number;
+  name?: string;
+  slug?: {};
+  title?: {};
+  content?: {};
+  image?: Record<string, ProcessedImageResult>;
+  packageType?: {};
+  url?: {};
+  price?: {},
+  description?: string;
+  features?: string[];
+  category?: string;
+  attributes?: [];
+  order?: number;
 }
 
 /** Giao diện bài viết chuẩn từ WordPress */
@@ -37,7 +66,7 @@ export interface WPProcessStep {
   benefit?: string;
   en_benefit?: string;
   order?: number;
-  image?: string;
+  image?: ProcessedImageResult;
 }
 
 /** Giao diện Bảng so sánh từ WordPress */
@@ -63,7 +92,7 @@ export interface WPInfo {
   sodienthoai?: string;
   email?: string;
   domain?: string;
-  logo?: string;
-  favicon?: string;
-  image?: string;
+  logo?: ProcessedImageResult;
+  favicon?: ProcessedImageResult;
+  image?: ProcessedImageResult;
 }

@@ -353,9 +353,9 @@ export default function HomePage({ data_process_steps, data_compre, data_info, d
                               <div className="relative aspect-video xl:aspect-square overflow-hidden border border-white/10 group-hover:border-primary/30 transition-colors">
                                 <div className="absolute inset-0 bg-primary/20 mix-blend-overlay z-10 group-hover:opacity-0 transition-opacity duration-500" />
                                 <picture>
-                                  <source srcSet={getWebpPath(step.image)} type="image/webp" />
+                                  <source srcSet={step.image.srcSet} type="image/webp" />
                                   <img
-                                    src={step.image}
+                                    src={step.image.src}
                                     alt={step[`${prefixWP}tieudechinh`] || ''}
                                     width={600}
                                     className="w-full h-full object-cover transition-all duration-500 scale-105 group-hover:scale-100 grayscale-0 [@media(hover:hover)]:grayscale [@media(hover:hover)]:group-hover:grayscale-0"

@@ -1,3 +1,4 @@
+import { WPInfo } from '@/entities';
 import { processAndStoreImage } from './imageProcessor'; // Import the new utility function
 // import { generateAndSaveSitemap } from './sitemap'; // Removed as sitemap is generated in Astro
 
@@ -89,7 +90,7 @@ export const content = {
     }
   };
 
-export async function getInfo(isPreview: boolean = false) {
+export async function getInfo(isPreview: boolean = false): Promise<WPInfo[]> {
   if (!WC_URL) {
     throw new Error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables. Không thể fetch thông tin chung.');
   }
@@ -106,7 +107,7 @@ export async function getInfo(isPreview: boolean = false) {
   
   const raw_data = await response.json();
 
-  return await Promise.all(raw_data.map(async (item: any) => {
+  return await Promise.all(raw_data.map(async (item: any): Promise<WPInfo> => {
     const logoUrl = item.acf.logo?.url || '';
     const faviconUrl = item.acf.favicon?.url || '';
     const imageUrl = item.acf.image?.url || '';

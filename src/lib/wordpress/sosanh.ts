@@ -1,7 +1,9 @@
 // src/lib/wordpress.ts
+import { WPComparison } from '@/entities/wordpress';
+
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
-export async function getCompre(status: string = 'publish') {
+export async function getCompre(status: string = 'publish'): Promise<WPComparison[]> {
   if (!WC_URL) {
     console.error('❌ LỖI: Biến WC_URL chưa được cấu hình trong Environment Variables.');
     return [];
@@ -21,7 +23,7 @@ export async function getCompre(status: string = 'publish') {
     return []; 
   }
 
-  return await Promise.all(raw_data.map(async (item: any) => {
+  return await Promise.all(raw_data.map(async (item: any): Promise<WPComparison> => {
     item.thongsokythuat = item.acf.thongsokythuat || '';
     item.en_thongsokythuat = item.acf.en_thongsokythuat || '';
     item.chungtoi = item.acf.chungtoi || '';

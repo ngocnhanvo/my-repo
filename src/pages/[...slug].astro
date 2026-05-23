@@ -1,6 +1,6 @@
 ---
 // src/pages/[...slug].astro
-import { Head } from "@/components/Head";
+import { Head, TopProgressBar } from "@/components/Head";
 import "@/styles/global.css";
 import AppRouter from '../components/Router';
 import { getProcessSteps } from '../lib/wordpress/quytrinh';
@@ -10,21 +10,20 @@ import { getPrivacyPage } from '../lib/wordpress/chinhsachbaomat';
 import { getTermsPage } from '../lib/wordpress/chinhsachdichvu';
 import { getAboutPage } from '../lib/wordpress/gioithieu';
 import { getProducts } from '../lib/wordpress/sanpham';
+import { getTemplates } from '../lib/wordpress/template';
 import { generateAndSaveSitemap } from '../lib/wordpress/sitemap';
 import { stripHtmlAndUnescape } from '../lib/stringUtils';
-import interFont1 from "public/fonts/inter/v20/UcCo3FwrK3iLTcvsYwYZ8UA3J58.woff2";
-import interFont2 from "public/fonts/inter/v20/UcCo3FwrK3iLTcvtYwYZ8UA3J58.woff2";
-import interFont3 from "public/fonts/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2";
 let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
 export async function getStaticPaths() {
   const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
   const data_process_steps = await getProcessSteps();
   const data_compre = await getCompre();
   const data_info = await getInfo();
-  const data_privacy = await getPrivacyPage(data_info[0] || {});
-  const data_terms = await getTermsPage(data_info[0] || {});
-  const data_about_me = await getAboutPage(data_info[0] || {});
+  const data_privacy = await getPrivacyPage(data_info[0]);
+  const data_terms = await getTermsPage(data_info[0]);
+  const data_about_me = await getAboutPage(data_info[0]);
   const data_products = await getProducts();
+  const data_templates = await getTemplates();
   const commonProps = {
     type: 'home',
     data_process_steps,
@@ -43,43 +42,55 @@ export async function getStaticPaths() {
       slug: undefined, // Trang chủ mặc định (vi)
       title: `${companyName || 'Vibe Code Studio'} - Sự kết hợp giữa AI và chuyên gia`,
       description: 'Tốc Độ AI & Chất Lượng Developer Xây dựng website chuyên nghiệp với sức mạnh AI và tay nghề chuyên gia',
-      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+      ogImage: data_info[0]?.image.src || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'vi',
       title: `${companyName || 'Vibe Code Studio'} - Sự kết hợp giữa AI và chuyên gia`,
       description: 'Tốc Độ AI & Chất Lượng Developer Xây dựng website chuyên nghiệp với sức mạnh AI và tay nghề chuyên gia',
-      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+      ogImage: data_info[0]?.image.src || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'en',
       title: `${companyName || 'Vibe Code Studio'} - Combining AI and Expertise`,
       description: 'AI Velocity & Developer Precision Build professional websites with AI power and expert craftsmanship',
-      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+      ogImage: data_info[0]?.image.src || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'vi/contact',
       title: `Liên Hệ - ${companyName} - ${data_info[0]?.['diachi'] || ''}`,
       description: 'Kết nối với đội ngũ phát triển của chúng tôi.',
-      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+      ogImage: data_info[0]?.image.src || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'en/contact',
       title: `Contact Us - ${companyName} - ${data_info[0]?.['en_diachi'] || ''}`,
       description: 'Get in touch with our expert developers.',
-      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+      ogImage: data_info[0]?.image.src || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'vi/products',
       title: `Sản Phẩm - ${companyName} - Ba gói dịch vụ phát triển website chuyên nghiệp`,
       description: 'Khám phá các sản phẩm của chúng tôi.',
-      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+      ogImage: data_info[0]?.image.src || `${WC_URL}/wp-content/uploads/og-image.jpg`,
     },
     {
       slug: 'en/products',
       title: `Products - ${companyName} - Three Professional Website Development Packages`,
       description: 'Explore our products.',
-      ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+      ogImage: data_info[0]?.image.src || `${WC_URL}/wp-content/uploads/og-image.jpg`,
+    },
+    {
+      slug: 'vi/templates',
+      title: `Mẫu Website - ${companyName} - Khám phá những mẫu website tuyệt vời`,
+      description: 'Khám phá những mẫu website tuyệt vời được thiết kế chuyên nghiệp cho mọi loại hình kinh doanh',
+      ogImage: data_info[0]?.image.src || `${WC_URL}/wp-content/uploads/og-image.jpg`
+    },
+    {
+      slug: 'en/templates',
+      title: `Website Templates - ${companyName} - Explore Professional Templates`,
+      description: 'Explore beautifully designed professional website templates for every type of business',
+      ogImage: data_info[0]?.image.src || `${WC_URL}/wp-content/uploads/og-image.jpg`
     }
   ];
 
@@ -87,42 +98,42 @@ export async function getStaticPaths() {
     slug: 'vi/privacy',
     title: `${data_privacy.title} - ${companyName}`,
     description: stripHtmlAndUnescape(data_privacy.content) || '',
-    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+    ogImage: data_info[0]?.image.src || `${WC_URL}/wp-content/uploads/og-image.jpg`
   });
 
   pages.push({
     slug: 'en/privacy',
     title: `${data_privacy.en_title} - ${companyName}`,
     description: stripHtmlAndUnescape(data_privacy.en_content) || '',
-    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+    ogImage: data_info[0]?.image.src || `${WC_URL}/wp-content/uploads/og-image.jpg`
   });
 
   pages.push({
     slug: 'vi/terms',
     title: `${data_terms.title || 'Terms of Service'} - ${companyName}`,
     description: stripHtmlAndUnescape(data_terms.content) || '',
-    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+    ogImage: data_info[0]?.image.src
   });
 
   pages.push({
     slug: 'en/terms',
     title: `${data_terms.en_title || 'Terms of Service'} - ${companyName}`,
     description: stripHtmlAndUnescape(data_terms.en_content) || '',
-    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+    ogImage: data_info[0]?.image.src
   });
 
   pages.push({
     slug: 'vi/about',
     title: `${data_about_me.title || 'About Us'} - ${companyName} - Tìm hiểu thêm về chúng tôi`,
     description: stripHtmlAndUnescape(data_about_me.content) || '',
-    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+    ogImage: data_info[0]?.image.src
   });
 
   pages.push({
     slug: 'en/about',
     title: `${data_about_me.en_title || 'About Us'} - ${companyName} - Learn More About Us`,
     description: stripHtmlAndUnescape(data_about_me.en_content) || '',
-    ogImage: data_info[0]?.['image'] || `${WC_URL}/wp-content/uploads/og-image.jpg`
+    ogImage: data_info[0]?.image.src
   });
 
   data_products.forEach((product) => {
@@ -130,14 +141,30 @@ export async function getStaticPaths() {
       slug: `vi/products/${product.baseSlug}`,
       title: `${product.title} - ${companyName}`,
       description: stripHtmlAndUnescape(product.content) || '',
-      ogImage: product.image || `${WC_URL}/wp-content/uploads/og-image.jpg` 
+      ogImage: product.image.src
     });
 
     pages.push({
       slug: `en/products/${product.baseSlug}`,
       title: `${product.en_title} - ${companyName}`,
       description: stripHtmlAndUnescape(product.en_content) || '',
-      ogImage: product.image || `${WC_URL}/wp-content/uploads/og-image.jpg` 
+      ogImage: product.image.src
+    });
+  });
+
+  data_templates.forEach((template) => {
+    pages.push({
+      slug: `vi/templates/${template.id}`,
+      title: `${template.title['vi']} - ${companyName}`,
+      description: stripHtmlAndUnescape(template.content['vi']) || '',
+      ogImage: template.image['vi'].src
+    });
+
+    pages.push({
+      slug: `en/templates/${template.id}`,
+      title: `${template.title['en']} - ${companyName}`,
+      description: stripHtmlAndUnescape(template.content['en']) || '',
+      ogImage: template.image['en'].src
     });
   });
   
@@ -156,6 +183,7 @@ export async function getStaticPaths() {
       data_terms,
       data_about_me,
       data_products,
+      data_templates,
       baseUrl: WC_URL,
       title: page.title, // Title riêng từng trang
       description: page.description, // Description riêng từng trang
@@ -164,7 +192,7 @@ export async function getStaticPaths() {
   }));
 }
 
-const { type, data_process_steps, data_compre, data_info, data_privacy, data_terms, data_about_me, data_products, baseUrl } = Astro.props;
+const { type, data_process_steps, data_compre, data_info, data_privacy, data_terms, data_about_me, data_products, data_templates, baseUrl } = Astro.props;
 const { slug } = Astro.params;
 const lang = slug?.split('/')[0] === 'en' ? 'en' : 'vi';
 const locale = lang === 'en' ? 'en_US' : 'vi_VN';
@@ -173,45 +201,21 @@ const locale = lang === 'en' ? 'en_US' : 'vi_VN';
 const siteOrigin = (WC_URL_CLIENT || Astro.url.origin).replace(/\/$/, '');
 const currentPageUrl = new URL(Astro.url.pathname, siteOrigin).href;
 const currentPageUrl2 = currentPageUrl == siteOrigin + '/' ? currentPageUrl + 'vi' : currentPageUrl;
+
 ---
 
 <html lang={lang} class="w-full h-full">
   <head>
     <Head />
-
     <!-- Basic SEO -->
     <title>{Astro.props.title}</title>
     <meta name="description" content={Astro.props.description} />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href={currentPageUrl2} />
+    <link rel="canonical" hreflang={lang} href={currentPageUrl2} />
     <link
         rel="icon"
-        href={data_info[0]?.['favicon'] || '/favicon.ico'}
+        href={data_info[0]?.favicon.srcSets["20"] || '/favicon.ico'}
     />
-    <link
-      rel="preload"
-      href={interFont1}
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-
-    <link
-      rel="preload"
-      href={interFont2}
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-
-    <link
-      rel="preload"
-      href={interFont3}
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-
     <!-- Open Graph (Facebook, Zalo, LinkedIn) -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={currentPageUrl2} />
@@ -253,6 +257,7 @@ const currentPageUrl2 = currentPageUrl == siteOrigin + '/' ? currentPageUrl + 'v
     })} />
   </head>
   <body class="w-full h-full">
+    <TopProgressBar client:load />
     <div style="display:none">Build ID: {Date.now()}</div>
     <div id="root" class="w-full h-full">
       {type === 'home' && (
@@ -265,6 +270,7 @@ const currentPageUrl2 = currentPageUrl == siteOrigin + '/' ? currentPageUrl + 'v
           data_terms={data_terms}
           data_about_me={data_about_me}
           data_products={data_products}
+          data_templates={data_templates}
           WC_URL={baseUrl}
         />
       )}

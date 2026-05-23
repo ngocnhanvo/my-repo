@@ -87,37 +87,59 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
     }
   }, [location.state, navigate, location.pathname]);
 
-  // Khai báo handler cho Turnstile
   const captchaError = t.captchaError;
+
   useEffect(() => {
+    let widgetId: string | null = null;
+
     const renderCaptcha = () => {
       if ((window as any).turnstile && turnstileContainerRef.current) {
-        (window as any).turnstile.render(turnstileContainerRef.current, {
-          sitekey: CLOUDFLARE_TURNSTILE_SITE_KEY,
-          theme: 'dark',
-          callback: (token: string) => {
-            setTurnstileToken(token);
-            setErrorMessage(prev => prev === captchaError ? '' : prev);
-          },
-        });
-        setIsCaptchaLoading(false);
+        // 1. Luôn bật trạng thái loading khi bắt đầu render/re-render ngôn ngữ mới
+        setIsCaptchaLoading(true);
+
+        try {
+          // 2. Render thẳng vào container ref, và lưu lại widgetId
+          widgetId = (window as any).turnstile.render(turnstileContainerRef.current, {
+            sitekey: CLOUDFLARE_TURNSTILE_SITE_KEY,
+            language: language, // Chạy chuẩn theo state language ('vi' hoặc 'en')
+            theme: 'dark',
+            callback: (token: string) => {
+              setTurnstileToken(token);
+              setErrorMessage(prev => prev === captchaError ? '' : prev);
+            },
+          });
+        } catch (error) {
+          console.error("Turnstile render error:", error);
+        } finally {
+          // 3. Tắt loading sau khi hoàn tất thiết lập
+          setIsCaptchaLoading(false);
+        }
       }
     };
 
-    // Nếu script đã load xong trước đó (vào lại trang)
+    // Kiểm tra trạng thái của thư viện Cloudflare
     if ((window as any).turnstile) {
       renderCaptcha();
     } else {
-      // Nếu script chưa load, gán vào hàm callback toàn cục mà ta sẽ thêm vào URL script
       (window as any).onTurnstileLoad = renderCaptcha;
     }
 
+    // Hàm dọn dẹp (Cleanup function) - CỰC KỲ QUAN TRỌNG TRONG SPA
     return () => {
       delete (window as any).onTurnstileLoad;
-      // Lưu ý: Turnstile tự dọn dẹp khi node bị gỡ khỏi DOM, 
-      // nhưng nếu muốn chắc chắn bạn có thể dùng turnstile.remove()
+      
+      // Nếu có widget cũ đang chạy, dùng chính xác widgetId hoặc container để gỡ bỏ sạch sẽ
+      if ((window as any).turnstile && turnstileContainerRef.current) {
+        if (widgetId) {
+          (window as any).turnstile.remove(widgetId);
+        } else {
+          (window as any).turnstile.remove(turnstileContainerRef.current);
+        }
+      }
+      // Reset lại token khi đổi ngôn ngữ để ép user verify lại bản dịch mới
+      setTurnstileToken(''); 
     };
-  }, [captchaError]); // Chỉ cần phụ thuộc vào chuỗi captchaError
+  }, [language, captchaError]);
 
   useEffect(() => {
     let timer: any;
@@ -276,7 +298,7 @@ export default function ContactPage({ data_info, data_products }: ContactPagePro
               </div>
 
               {/* Cloudflare Turnstile Widget Container */}
-              <div className="relative min-h-[65px] flex items-center">
+              <div id="cloudflare-captcha" className="relative min-h-[65px] flex items-center">
                 <AnimatePresence>
                   {isCaptchaLoading && (
                     <motion.div 
