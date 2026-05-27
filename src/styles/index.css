@@ -10,4 +10,22 @@
   .article-content p {
     text-align: justify;
   }
+
+  /* Cấu hình chung cho tất cả màn hình mobile dưới 480px */
+  @media (max-width: 480px) {
+      #cloudflare-captcha {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        transform-origin: center center !important;
+        transform: scale(1) !important; /* Mặc định giữ nguyên kích thước */
+      }
+  }
+
+  /* Riêng màn hình siêu nhỏ dưới 400px thì chỉ cần đè mỗi thuộc tính scale */
+  @media (max-width: 400px) {
+      #cloudflare-captcha {
+        transform: scale(0.8) !important; 
+      }
+  }
 }

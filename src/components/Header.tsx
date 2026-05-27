@@ -100,7 +100,8 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
       setIsMobileSubmenuOpen(false);
       const targetPath = `/${language}${href.startsWith('/') ? href : `/${href}`}`;
       
-      window.dispatchEvent(new Event('app:nav-start'));
+      if(location.pathname != targetPath)
+        window.dispatchEvent(new Event('app:nav-start'));
 
       // Sử dụng setTimeout 0 để tách biệt việc đóng menu (UI update) và chuyển trang (Heavy task)
       // Giúp trình duyệt phản hồi click ngay lập tức mà không bị "khựng" do tranh chấp tài nguyên
@@ -121,7 +122,7 @@ export default function Header({ language, infoData, prefixWP, setLanguage, data
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
             className="flex items-center gap-3 cursor-pointer" // Still scroll to hero on logo click
-            onClick={() => handleNavClick('#hero')}
+            onClick={() => handleNavClick('/')}
           >
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center overflow-hidden">
               {infoData.logo ? (

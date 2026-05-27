@@ -53,7 +53,10 @@ const LazyImage: React.FC<{
       {isIntersected && (
         <picture>
           {/* Vì tất cả file trong srcSet của bạn là WebP nên điền vào đây */}
-          <source srcSet={srcSet} type="image/webp" sizes="(max-width: 600px) 400px, (max-width: 1200px) 800px, 1200px" />
+          <source 
+            srcSet={srcSet} type="image/webp" 
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          />
           
           <img 
             src={src} // Ảnh gốc dự phòng khi không chạy được source

@@ -123,6 +123,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, d
 
       <Header language={language} infoData={infoData} prefixWP={prefixWP} setLanguage={setLanguage} data_products={data_products} />
 
+      <main>
       {/* HERO SECTION - The Digital Forge */}
       <section 
         id="hero" 
@@ -673,7 +674,7 @@ export default function HomePage({ data_process_steps, data_compre, data_info, d
           </motion.div>
         </div>
       </section>
-
+      </main>
       <Footer language={language} infoData={infoData} prefixWP={prefixWP} />
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense, useLayoutEffect, useRef } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, Outlet, useParams, useLocation, useNavigate, ScrollRestoration } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import ErrorPage from '@/integrations/errorHandlers/ErrorPage'; // Keep ErrorPage
 import { MemberProvider } from '@/integrations';
 import { WPProcessStep, WPComparison, WPInfo, WPTemplate } from '@/entities';
