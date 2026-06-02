@@ -196,7 +196,7 @@ export default function TemplateDetailPage({ data_info = [], data_templates = []
 
         <motion.div 
           initial={false}
-          animate={{ width: viewMode === 'mobile' ? '100%' : deviceConfig[viewMode].width }}
+          animate={{ width: deviceConfig[viewMode].width }}
           transition={{ type: 'spring', damping: 20, stiffness: 100 }}
           className="h-full bg-white shadow-2xl relative shadow-primary/5 overflow-auto ios-iframe-wrapper"
           style={{ WebkitOverflowScrolling: 'touch' }}

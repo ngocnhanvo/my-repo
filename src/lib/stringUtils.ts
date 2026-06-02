@@ -65,3 +65,16 @@ export const formatCurrency = (amount: number | string, currency: string = 'VND'
   currency = removeUnicode(currency);
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: currency }).format(num);
 };
+
+export const detectDevice = () => {
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+  // A simple heuristic for mobile devices: check user agent and screen width
+  // Using 768px as a common breakpoint for tablets/mobiles
+  const isMobile = /android|ipad|iphone|ipod|blackberry|iemobile|opera mini/i.test(userAgent) || window.innerWidth < 768;
+
+  return {
+    isMobile,
+    isTablet: /ipad|tablet/i.test(userAgent) || (window.innerWidth >= 768 && window.innerWidth < 1024),
+    isDesktop: !isMobile && !/ipad|tablet/i.test(userAgent) && window.innerWidth >= 1024
+  };
+};
