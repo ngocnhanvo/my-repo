@@ -19,6 +19,9 @@ let WC_URL_CLIENT = import.meta.env.WC_URL_CLIENT || process.env.WC_URL_CLIENT;
 const { slug } = Astro.params;
 const WC_URL = import.meta.env.WC_URL || process.env.WC_URL;
 
+const lang = slug?.split('/')[0] === 'en' ? 'en' : 'vi';
+const locale = lang === 'en' ? 'en_US' : 'vi_VN';
+
 // Fetch dữ liệu trực tiếp cho mỗi lần request (SSR)
 // Lưu ý: Truyền 'any' hoặc 'draft,publish' để lấy được bản nháp
 const data_process_steps = await getProcessSteps(undefined, true); // Đang ở chế độ preview
@@ -142,14 +145,14 @@ const data_templates = await getTemplates(undefined, true);
       slug: `vi/templates/${template.id}`,
       title: `${template.title['vi']} - ${companyName}`,
       description: stripHtmlAndUnescape(template.content['vi']) || '',
-      ogImage: template.image[lang].src || `${WC_URL}/wp-content/uploads/og-image.jpg` 
+      ogImage: template.image['vi'].src || `${WC_URL}/wp-content/uploads/og-image.jpg` 
     });
 
     pages.push({
       slug: `en/templates/${template.id}`,
       title: `${template.title['en']} - ${companyName}`,
       description: stripHtmlAndUnescape(template.content['en']) || '',
-      ogImage: template.image[lang].src || `${WC_URL}/wp-content/uploads/og-image.jpg` 
+      ogImage: template.image['en'].src || `${WC_URL}/wp-content/uploads/og-image.jpg` 
     });
   });
   
@@ -158,9 +161,6 @@ const currentPageData = pages.find(p => p.slug === slug) || pages[0];
 const title = currentPageData.title;
 const description = currentPageData.description;
 const ogImage = currentPageData.ogImage;
-
-const lang = slug?.split('/')[0] === 'en' ? 'en' : 'vi';
-const locale = lang === 'en' ? 'en_US' : 'vi_VN';
 
 // Sử dụng Astro.url để lấy URL chính xác, đảm bảo không bị lỗi double slash
 const siteOrigin = (WC_URL_CLIENT || Astro.url.origin).replace(/\/$/, '');
@@ -223,7 +223,7 @@ const currentPageUrl = new URL(Astro.url.pathname, siteOrigin).href;
     <div style="display:none">Build ID: {Date.now()}</div>
     <div id="root" class="w-full h-full">
         <AppRouter
-          client:only="react"
+          client:idle
           data_process_steps={data_process_steps}
           data_compre={data_compre}
           data_info={data_info}
